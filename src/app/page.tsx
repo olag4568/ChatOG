@@ -68,7 +68,7 @@ type ChatApiResponse = {
 
 const supabase = createClient();
 
-export default function ChatOG() {
+export default function OLANIX() {
   const router = useRouter();
 
   // =====================================================
@@ -1424,7 +1424,7 @@ export default function ChatOG() {
             await response.json();
         } catch {
           throw new Error(
-            "ChatOG returned an invalid response."
+            "OLANIX returned an invalid response."
           );
         }
 
@@ -1501,7 +1501,7 @@ export default function ChatOG() {
         const errorText =
           error instanceof Error
             ? error.message
-            : "Something went wrong while connecting to ChatOG.";
+            : "Something went wrong while connecting to OLANIX.";
 
         const errorMessage: Message = {
           id: Date.now() + 1,
@@ -1659,7 +1659,7 @@ export default function ChatOG() {
           </div>
 
           <p className="text-sm text-[#71717a]">
-            Loading ChatOG...
+            Loading OLANIX...
           </p>
         </div>
       </div>
@@ -2368,7 +2368,7 @@ export default function ChatOG() {
                         : "text-[#737373]"
                     }`}
                   >
-                    Allow ChatOG to provide
+                    Allow OLANIX to provide
                     local weather and
                     location-based
                     information.
@@ -2553,7 +2553,7 @@ export default function ChatOG() {
                 : "text-[#a3a3a3]"
             }`}
           >
-            ChatOG can make mistakes.
+            OLANIX can make mistakes.
             Check important
             information.
           </p>
@@ -2781,7 +2781,7 @@ export default function ChatOG() {
                       : "text-[#737373]"
                   }`}
                 >
-                  Customize your ChatOG
+                  Customize your OLANIX
                   experience.
                 </p>
               </div>
@@ -2996,7 +2996,7 @@ export default function ChatOG() {
                             : "text-[#737373]"
                         }`}
                       >
-                        Let ChatOG remember
+                        Let OLANIX remember
                         useful information
                         about you.
                       </p>
@@ -3046,12 +3046,12 @@ export default function ChatOG() {
                   {!memoryAccess
                     ? "Memory is available on Pro and Owner accounts."
                     : memoryEnabled
-                    ? "Memory is enabled for ChatOG."
+                    ? "Memory is enabled for OLANIX."
                     : "Memory is turned off."}
                 </div>
               </div>
 
-              {/* CHATOG */}
+              {/* OLANIX */}
 
               <div
                 className={`rounded-2xl border p-4 ${
@@ -3076,7 +3076,7 @@ export default function ChatOG() {
 
                   <div>
                     <p className="text-sm font-medium">
-                      ChatOG
+                      OLANIX
                     </p>
 
                     <p
@@ -3099,7 +3099,7 @@ export default function ChatOG() {
                           : "text-[#a3a3a3]"
                       }`}
                     >
-                      ChatOG settings are
+                      OLANIX settings are
                       saved when
                       applicable.
                     </p>
