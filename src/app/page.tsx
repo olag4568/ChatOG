@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 
 import {
   Home as HomeIcon,
+  Menu,
   MessageSquarePlus,
   History,
   Compass,
@@ -94,6 +95,7 @@ export default function OLANIX() {
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // =====================================================
   // MEMORY
@@ -1672,18 +1674,30 @@ export default function OLANIX() {
 
   return (
     <div
-      className={`h-screen w-full flex overflow-hidden transition-colors duration-300 ${
+      className={`h-dvh w-full flex overflow-hidden transition-colors duration-300 ${
         isDarkMode
           ? "bg-black text-white"
           : "bg-white text-black"
       }`}
     >
+      {/* Mobile sidebar backdrop */}
+      {isMobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        />
+      )}
+
       {/* =================================================
           LEFT SIDEBAR
           ================================================= */}
 
       <aside
-        className={`w-64 shrink-0 border-r flex flex-col transition-colors duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 border-r flex flex-col transition-transform duration-300 md:static md:z-auto md:translate-x-0 ${
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } ${
           isDarkMode
             ? "bg-black border-[#1a1a1a]"
             : "bg-white border-[#e5e5e5]"
@@ -1943,9 +1957,26 @@ export default function OLANIX() {
             : "bg-white"
         }`}
       >
+        {/* Mobile header */}
+        <div className={`flex items-center gap-3 border-b px-4 py-3 md:hidden ${
+          isDarkMode ? "border-[#1a1a1a]" : "border-[#e5e5e5]"
+        }`}>
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+              isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"
+            }`}
+          >
+            <Menu size={21} />
+          </button>
+          <span className="text-base font-semibold">OLANIX</span>
+        </div>
+
         {/* MESSAGES */}
 
-        <div className="relative z-10 w-full max-w-3xl mx-auto flex-1 overflow-y-auto px-5 py-6">
+        <div className="relative z-10 w-full max-w-3xl mx-auto flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-6">
           {messages.length === 0 &&
             !loading && (
               <div className="min-h-full flex flex-col items-center justify-center text-center px-4">
