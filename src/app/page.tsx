@@ -2126,7 +2126,7 @@ export default function OLANIX() {
         <div className="relative z-10 w-full max-w-3xl mx-auto flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-6">
           {messages.length === 0 &&
             !loading && (
-              <div className="min-h-full flex flex-col items-center justify-center text-center px-4">
+              <div className="min-h-full flex flex-col items-center justify-start pt-12 sm:pt-16 text-center px-4">
                 <div
                   className={`w-16 h-16 rounded-2xl border flex items-center justify-center mb-5 ${
                     isDarkMode
@@ -2600,7 +2600,11 @@ export default function OLANIX() {
             INPUT
             ================================================= */}
 
-        <div className="relative z-20 w-full max-w-3xl mx-auto px-5 pb-6 pt-2">
+        <div className={`z-20 w-full max-w-3xl mx-auto px-5 pb-6 pt-2 transition-all duration-200 ${
+          messages.length === 0 && !loading
+            ? "absolute left-0 right-0 top-1/2 -translate-y-1/2"
+            : "relative"
+        }`}>
           <div
             className={`relative border rounded-3xl px-4 shadow-2xl transition-all duration-200 ${
               imagePreview
