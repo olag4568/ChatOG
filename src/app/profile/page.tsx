@@ -51,7 +51,7 @@ export default function ProfilePage() {
           className="flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition"
         >
           <ArrowLeft size={18} />
-          Back to ChatOG
+          Back to OLANIX
         </button>
 
         <div className="rounded-2xl border border-[#222] bg-[#0a0a0a] p-6">
@@ -66,7 +66,7 @@ export default function ProfilePage() {
               </h1>
 
               <p className="text-sm text-zinc-500">
-                Your ChatOG account
+                Your OLANIX account
               </p>
             </div>
           </div>
