@@ -1674,11 +1674,6 @@ export default function OLANIX() {
       icon: LibraryBig,
       action: "library",
     },
-    {
-      name: "Settings",
-      icon: Settings,
-      action: "settings",
-    },
   ];
 
   // =====================================================
@@ -1781,7 +1776,7 @@ export default function OLANIX() {
 
         {/* MENU */}
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="shrink-0 p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
@@ -1817,6 +1812,105 @@ export default function OLANIX() {
             );
           })}
         </nav>
+
+        {/* CHAT HISTORY */}
+
+        <div className={`flex-1 min-h-0 flex flex-col border-t ${
+          isDarkMode ? "border-[#1a1a1a]" : "border-[#e5e5e5]"
+        }`}>
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex items-center gap-2 min-w-0">
+              <History size={17} className="shrink-0 text-blue-500" />
+              <span className="text-sm font-semibold">History</span>
+            </div>
+            <button
+              type="button"
+              onClick={loadRecentChats}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
+                isDarkMode
+                  ? "text-[#a1a1aa] hover:bg-[#151515] hover:text-white"
+                  : "text-[#737373] hover:bg-[#f3f3f3] hover:text-black"
+              }`}
+              aria-label="Reload history"
+              title="Reload history"
+            >
+              <RefreshCw size={15} />
+            </button>
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
+            {recentChats.length === 0 ? (
+              <div className="flex flex-col items-center justify-center px-2 py-6 text-center">
+                <History size={21} className={`mb-2 ${
+                  isDarkMode ? "text-[#52525b]" : "text-[#a3a3a3]"
+                }`} />
+                <p className="text-xs font-medium">
+                  {isAuthenticated ? "No chat history" : "Log in to save chat history"}
+                </p>
+                <p className={`mt-1 text-[11px] leading-5 ${
+                  isDarkMode ? "text-[#52525b]" : "text-[#a3a3a3]"
+                }`}>
+                  {isAuthenticated
+                    ? "Your conversations will appear here."
+                    : "Log in or sign up to keep your conversations."}
+                </p>
+                {!isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/login")}
+                    className="mt-3 rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-medium text-white transition hover:bg-blue-500"
+                  >
+                    Log in / Sign up
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {recentChats.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className={`group flex min-w-0 items-center gap-1 rounded-xl transition ${
+                      chat.id === chatId
+                        ? isDarkMode ? "bg-[#151515]" : "bg-[#f3f3f3]"
+                        : isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => openChat(chat.id)}
+                      className={`flex-1 min-w-0 rounded-xl px-3 py-3 text-left text-xs transition ${
+                        isDarkMode
+                          ? "text-[#a1a1aa] hover:text-white"
+                          : "text-[#525252] hover:text-black"
+                      }`}
+                      title={chat.title || "Untitled chat"}
+                    >
+                      <span className="block truncate">
+                        {chat.title || "Untitled chat"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteChat(chat.id);
+                      }}
+                      className={`mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg opacity-100 transition lg:opacity-0 lg:group-hover:opacity-100 ${
+                        isDarkMode
+                          ? "text-[#71717a] hover:bg-red-950 hover:text-red-400"
+                          : "text-[#737373] hover:bg-red-50 hover:text-red-600"
+                      }`}
+                      aria-label="Delete chat"
+                      title="Delete chat"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* PROFILE */}
 
@@ -2643,188 +2737,6 @@ export default function OLANIX() {
           </p>
         </div>
       </main>
-
-      {/* =================================================
-          RIGHT SIDEBAR
-          ================================================= */}
-
-      <aside
-        className={`w-80 shrink-0 border-l hidden lg:flex flex-col transition-colors duration-300 ${
-          isDarkMode
-            ? "bg-black border-[#1a1a1a]"
-            : "bg-white border-[#e5e5e5]"
-        }`}
-      >
-        {/* HEADER */}
-
-        <div
-          className={`h-20 flex items-center justify-between px-5 border-b ${
-            isDarkMode
-              ? "border-[#1a1a1a]"
-              : "border-[#e5e5e5]"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <History
-              size={20}
-              className="text-blue-500"
-            />
-
-            <span className="font-semibold text-lg">
-              History
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={
-              loadRecentChats
-            }
-            className={`w-9 h-9 rounded-lg flex items-center justify-center transition ${
-              isDarkMode
-                ? "text-[#a1a1aa] hover:bg-[#151515] hover:text-white"
-                : "text-[#737373] hover:bg-[#f3f3f3] hover:text-black"
-            }`}
-            aria-label="Reload history"
-            title="Reload history"
-          >
-            <RefreshCw size={17} />
-          </button>
-        </div>
-
-        {/* HISTORY */}
-
-        <div className="flex-1 overflow-y-auto p-4">
-          {recentChats.length ===
-          0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${
-                  isDarkMode
-                    ? "bg-[#111111]"
-                    : "bg-[#f5f5f5]"
-                }`}
-              >
-                <History
-                  size={22}
-                  className="text-blue-500"
-                />
-              </div>
-
-              <p className="text-sm font-medium">
-                {isAuthenticated ? "No chat history" : "Log in to save chat history"}
-              </p>
-
-              <p
-                className={`text-xs mt-1 ${
-                  isDarkMode
-                    ? "text-[#52525b]"
-                    : "text-[#a3a3a3]"
-                }`}
-              >
-                {isAuthenticated
-                  ? "Your conversations will appear here."
-                  : "Create an account or log in to keep your conversations."}
-              </p>
-
-              {!isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={() => router.push("/login")}
-                  className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-blue-500"
-                >
-                  Log in / Sign up
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {recentChats.map(
-                (chat) => (
-                  <div
-                    key={chat.id}
-                    className={`group flex items-center gap-1 rounded-xl transition ${
-                      chat.id === chatId
-                        ? isDarkMode
-                          ? "bg-[#151515]"
-                          : "bg-[#f3f3f3]"
-                        : isDarkMode
-                        ? "hover:bg-[#111111]"
-                        : "hover:bg-[#f3f3f3]"
-                    }`}
-                  >
-                    {/* OPEN */}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openChat(
-                          chat.id
-                        )
-                      }
-                      className={`flex-1 min-w-0 text-left px-3 py-3 rounded-xl text-sm transition ${
-                        chat.id ===
-                        chatId
-                          ? isDarkMode
-                            ? "text-white"
-                            : "text-black"
-                          : isDarkMode
-                          ? "text-[#a1a1aa] hover:text-white"
-                          : "text-[#525252] hover:text-black"
-                      }`}
-                      title={
-                        chat.title ||
-                        "Untitled chat"
-                      }
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <MessageSquarePlus
-                          size={16}
-                          className={`shrink-0 ${
-                            chat.id ===
-                            chatId
-                              ? "text-blue-500"
-                              : "opacity-50"
-                          }`}
-                        />
-
-                        <span className="truncate">
-                          {chat.title ||
-                            "Untitled chat"}
-                        </span>
-                      </div>
-                    </button>
-
-                    {/* DELETE */}
-
-                    <button
-                      type="button"
-                      onClick={(
-                        e
-                      ) => {
-                        e.stopPropagation();
-
-                        deleteChat(
-                          chat.id
-                        );
-                      }}
-                      className={`mr-2 w-8 h-8 shrink-0 rounded-lg flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition ${
-                        isDarkMode
-                          ? "text-[#71717a] hover:bg-red-950 hover:text-red-400"
-                          : "text-[#737373] hover:bg-red-50 hover:text-red-600"
-                      }`}
-                      aria-label="Delete chat"
-                      title="Delete chat"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                )
-              )}
-            </div>
-          )}
-        </div>
-      </aside>
 
       {/* =================================================
           WORKSPACE FEATURE PANEL
