@@ -81,6 +81,7 @@ export default function OLANIX() {
   const [chatId, setChatId] = useState<string | null>(null);
   const [recentChats, setRecentChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // =====================================================
   // THEME
@@ -180,10 +181,13 @@ export default function OLANIX() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
+        setIsAuthenticated(false);
         setAccountRole("free");
         setMemoryEnabled(false);
         return;
       }
+
+      setIsAuthenticated(true);
 
       const { data, error } = await supabase
         .from("user_settings")
@@ -1355,30 +1359,38 @@ export default function OLANIX() {
         | null = chatId;
 
       try {
-        if (!chatToSave) {
-          chatToSave =
-            await createChat(
-              textToSend ||
-                "Image Chat"
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        const canSaveChat = !authError && Boolean(user);
+        setIsAuthenticated(canSaveChat);
+
+        if (canSaveChat) {
+          if (!chatToSave) {
+            chatToSave = await createChat(
+              textToSend || "Image Chat"
             );
 
-          window.history.replaceState(
-            {},
-            "",
-            `/?chat=${chatToSave}`
-          );
-        }
+            window.history.replaceState(
+              {},
+              "",
+              `/?chat=${chatToSave}`
+            );
+          }
 
-        if (!chatToSave) {
-          throw new Error(
-            "Chat ID was not created."
-          );
-        }
+          if (!chatToSave) {
+            throw new Error("Chat ID was not created.");
+          }
 
-        await saveChatMessages(
-          chatToSave,
-          currentMessages
-        );
+          await saveChatMessages(chatToSave, currentMessages);
+        } else {
+          // Guests can chat normally, but their conversations are session-only.
+          chatToSave = null;
+          setChatId(null);
+          window.history.replaceState({}, "", "/");
+        }
 
         const timezone =
           Intl.DateTimeFormat()
@@ -1806,7 +1818,7 @@ export default function OLANIX() {
                   );
 
                   router.push(
-                    "/profile"
+                    isAuthenticated ? "/profile" : "/login"
                   );
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition ${
@@ -1818,7 +1830,7 @@ export default function OLANIX() {
                 <User size={18} />
 
                 <span>
-                  Profile
+                  {isAuthenticated ? "Profile" : "Log in / Sign up"}
                 </span>
               </button>
 
@@ -1856,25 +1868,39 @@ export default function OLANIX() {
                 }`}
               />
 
-              {/* LOGOUT */}
-
-              <button
-                type="button"
-                onClick={
-                  handleLogout
-                }
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition ${
-                  isDarkMode
-                    ? "text-red-400 hover:bg-red-950/30"
-                    : "text-red-600 hover:bg-red-50"
-                }`}
-              >
-                <LogOut size={18} />
-
-                <span>
-                  Log out
-                </span>
-              </button>
+              {isAuthenticated ? (
+                <>
+                  {/* LOGOUT */}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition ${
+                      isDarkMode
+                        ? "text-red-400 hover:bg-red-950/30"
+                        : "text-red-600 hover:bg-red-50"
+                    }`}
+                  >
+                    <LogOut size={18} />
+                    <span>Log out</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    router.push("/login");
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm transition ${
+                    isDarkMode
+                      ? "text-blue-400 hover:bg-[#151515]"
+                      : "text-blue-600 hover:bg-[#f5f5f5]"
+                  }`}
+                >
+                  <User size={18} />
+                  <span>Log in / Sign up</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -1911,7 +1937,7 @@ export default function OLANIX() {
                     : "text-black"
                 }`}
               >
-                Profile
+                {isAuthenticated ? "Profile" : "Guest"}
               </p>
 
               <p
@@ -1921,11 +1947,11 @@ export default function OLANIX() {
                     : "text-[#737373]"
                 }`}
               >
-                {accountRole ===
-                "owner"
+                {!isAuthenticated
+                  ? "Guest Mode"
+                  : accountRole === "owner"
                   ? "Owner"
-                  : accountRole ===
-                    "pro"
+                  : accountRole === "pro"
                   ? "Pro Plan"
                   : "Free Plan"}
               </p>
@@ -2659,7 +2685,7 @@ export default function OLANIX() {
               </div>
 
               <p className="text-sm font-medium">
-                No chat history
+                {isAuthenticated ? "No chat history" : "Log in to save chat history"}
               </p>
 
               <p
@@ -2669,9 +2695,20 @@ export default function OLANIX() {
                     : "text-[#a3a3a3]"
                 }`}
               >
-                Your conversations will
-                appear here.
+                {isAuthenticated
+                  ? "Your conversations will appear here."
+                  : "Create an account or log in to keep your conversations."}
               </p>
+
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/login")}
+                  className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-blue-500"
+                >
+                  Log in / Sign up
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
