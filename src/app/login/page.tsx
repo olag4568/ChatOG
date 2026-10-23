@@ -146,7 +146,7 @@ export default function LoginPage() {
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold">
               Welcome back to{" "}
-              <span className="text-blue-500">ChatOG</span>
+              <span className="text-blue-500">OLANIX</span>
             </h1>
 
             <p className="mt-2 text-sm text-gray-500">
