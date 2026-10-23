@@ -39,12 +39,12 @@ export default function SignupPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold">
             Create your{" "}
-            <span className="text-blue-500">ChatOG</span>{" "}
+            <span className="text-blue-500">OLANIX</span>{" "}
             account
           </h1>
 
           <p className="mt-2 text-sm text-gray-500">
-            Create an account to use ChatOG
+            Create an account to use OLANIX
           </p>
         </div>
 
