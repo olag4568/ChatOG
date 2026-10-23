@@ -128,7 +128,7 @@ export default function HistoryPage() {
   const openChat = (id: string) => {
     /*
       Save the chat ID temporarily so the main
-      ChatOG page can know which conversation
+      OLANIX page can know which conversation
       should be opened.
     */
     sessionStorage.setItem("chatog_open_chat", id);
@@ -232,14 +232,11 @@ export default function HistoryPage() {
         >
           <ArrowLeft size={19} />
 
-          <span>Back to ChatOG</span>
+          <span>Back to OLANIX</span>
         </button>
 
         <div className="ml-auto text-xl font-bold">
-          Chat
-          <span className="text-blue-500">
-            OG
-          </span>
+          OLANIX
         </div>
       </header>
 
@@ -257,7 +254,7 @@ export default function HistoryPage() {
             </h1>
 
             <p className="text-[#71717a] mt-2">
-              Your previous conversations with ChatOG.
+              Your previous conversations with OLANIX.
             </p>
           </div>
 
@@ -336,7 +333,7 @@ export default function HistoryPage() {
               </h2>
 
               <p className="text-sm text-[#71717a] mt-2">
-                Start a conversation with ChatOG
+                Start a conversation with OLANIX
                 and it will appear here.
               </p>
 
