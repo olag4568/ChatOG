@@ -7,7 +7,6 @@ import remarkGfm from "remark-gfm";
 import { createClient } from "@/lib/supabase/client";
 
 import {
-  Home as HomeIcon,
   Menu,
   MessageSquarePlus,
   History,
@@ -26,6 +25,9 @@ import {
   LogOut,
   ChevronUp,
   ChevronDown,
+  Plug,
+  Code2,
+  LibraryBig,
 } from "lucide-react";
 
 type Message = {
@@ -97,6 +99,7 @@ export default function OLANIX() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<string | null>(null);
 
   // =====================================================
   // MEMORY
@@ -1642,20 +1645,39 @@ export default function OLANIX() {
 
   const menuItems = [
     {
-      name: "Home",
-      icon: HomeIcon,
-    },
-    {
       name: "New Chat",
       icon: MessageSquarePlus,
+      action: "new-chat",
     },
     {
       name: "Explore",
       icon: Compass,
+      action: "explore",
     },
     {
-      name: "Image",
+      name: "Images",
       icon: ImageIcon,
+      action: "images",
+    },
+    {
+      name: "Plugins",
+      icon: Plug,
+      action: "plugins",
+    },
+    {
+      name: "Codex",
+      icon: Code2,
+      action: "codex",
+    },
+    {
+      name: "Library",
+      icon: LibraryBig,
+      action: "library",
+    },
+    {
+      name: "Settings",
+      icon: Settings,
+      action: "settings",
     },
   ];
 
@@ -1768,13 +1790,16 @@ export default function OLANIX() {
                 key={item.name}
                 type="button"
                 onClick={() => {
-                  if (
-                    item.name ===
-                      "Home" ||
-                    item.name ===
-                      "New Chat"
-                  ) {
+                  setIsMobileSidebarOpen(false);
+
+                  if (item.action === "new-chat") {
                     handleNewChat();
+                  } else if (item.action === "images") {
+                    imageInputRef.current?.click();
+                  } else if (item.action === "settings") {
+                    setShowSettings(true);
+                  } else {
+                    setActiveFeature(item.name);
                   }
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
@@ -2800,6 +2825,68 @@ export default function OLANIX() {
           )}
         </div>
       </aside>
+
+      {/* =================================================
+          WORKSPACE FEATURE PANEL
+          ================================================= */}
+
+      {activeFeature && (
+        <div
+          className="fixed inset-0 z-[180] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setActiveFeature(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="workspace-feature-title"
+            onClick={(event) => event.stopPropagation()}
+            className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl ${
+              isDarkMode
+                ? "bg-[#0d0d0d] border-[#292929] text-white"
+                : "bg-white border-[#e5e5e5] text-black"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-blue-500">
+                  OLANIX workspace
+                </p>
+                <h2 id="workspace-feature-title" className="mt-2 text-xl font-semibold">
+                  {activeFeature}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveFeature(null)}
+                aria-label={`Close ${activeFeature}`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${
+                  isDarkMode ? "hover:bg-[#1c1c1c]" : "hover:bg-[#f3f3f3]"
+                }`}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className={`mt-4 text-sm leading-6 ${
+              isDarkMode ? "text-[#a1a1aa]" : "text-[#525252]"
+            }`}>
+              {activeFeature === "Explore"
+                ? "Discover more ways to use OLANIX. More tools and curated experiences can be added here."
+                : activeFeature === "Plugins"
+                ? "A dedicated home for connected tools and integrations. Plugin connections are not available in this build yet."
+                : activeFeature === "Codex"
+                ? "A coding workspace for building, understanding, and improving projects. The dedicated coding tools are coming in a future update."
+                : "A place for saved files, images, and useful content. Persistent library management is not available in this build yet."}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveFeature(null)}
+              className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-500"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* =================================================
           SETTINGS POPUP
