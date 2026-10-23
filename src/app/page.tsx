@@ -2124,44 +2124,6 @@ export default function OLANIX() {
         {/* MESSAGES */}
 
         <div className="relative z-10 w-full max-w-3xl mx-auto flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-6">
-          {messages.length === 0 &&
-            !loading && (
-              <div className="min-h-full flex flex-col items-center justify-start pt-12 sm:pt-16 text-center px-4">
-                <div
-                  className={`w-16 h-16 rounded-2xl border flex items-center justify-center mb-5 ${
-                    isDarkMode
-                      ? "bg-[#0d0d0d] border-[#222222]"
-                      : "bg-[#f7f7f7] border-[#e5e5e5]"
-                  }`}
-                >
-                  <Sparkles
-                    size={30}
-                    className="text-blue-500"
-                  />
-                </div>
-
-                <h1 className="text-4xl font-bold mb-3">
-                  Chat
-                  <span className="text-blue-500">
-                    OG
-                  </span>
-                </h1>
-
-                <p
-                  className={`max-w-md text-sm leading-6 ${
-                    isDarkMode
-                      ? "text-[#71717a]"
-                      : "text-[#737373]"
-                  }`}
-                >
-                  Your AI assistant for
-                  questions, ideas,
-                  coding, learning and
-                  more.
-                </p>
-              </div>
-            )}
-
           <div className="space-y-5">
             {messages.map((msg) => (
               <div
@@ -2605,6 +2567,9 @@ export default function OLANIX() {
             ? "absolute left-0 right-0 top-1/2 -translate-y-1/2"
             : "relative"
         }`}>
+          <div className={`mx-auto w-full max-w-xl ${
+            messages.length === 0 && !loading ? "min-h-[68px]" : ""
+          }`}>
           <div
             className={`relative border rounded-3xl px-4 shadow-2xl transition-all duration-200 ${
               imagePreview
@@ -2655,7 +2620,7 @@ export default function OLANIX() {
               className="hidden"
             />
 
-            <div className="flex items-end w-full">
+            <div className={`flex w-full items-center ${messages.length === 0 && !loading ? "min-h-[60px]" : "items-end"}`}>
               {/* IMAGE */}
 
               <button
@@ -2694,7 +2659,7 @@ export default function OLANIX() {
                   handleKeyDown
                 }
                 placeholder="Ask me anything..."
-                className={`flex-1 min-w-0 bg-transparent text-sm focus:outline-none resize-none leading-6 max-h-[180px] overflow-y-auto py-1 ${
+                className={`flex-1 min-w-0 bg-transparent text-sm focus:outline-none resize-none leading-6 max-h-[180px] overflow-y-auto py-1 self-center ${
                   isDarkMode
                     ? "text-white placeholder-[#52525b]"
                     : "text-black placeholder-[#a3a3a3]"
@@ -2728,6 +2693,7 @@ export default function OLANIX() {
             </div>
           </div>
 
+          </div>
           <p
             className={`text-[11px] text-center mt-2 ${
               isDarkMode
