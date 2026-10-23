@@ -1502,10 +1502,12 @@ export default function OLANIX() {
           finalMessages
         );
 
-        await saveChatMessages(
-          chatToSave,
-          finalMessages
-        );
+        if (chatToSave) {
+          await saveChatMessages(
+            chatToSave,
+            finalMessages
+          );
+        }
       } catch (error) {
         console.error(
           "CHAT ERROR:",
