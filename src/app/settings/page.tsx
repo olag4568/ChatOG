@@ -238,7 +238,7 @@ export default function SettingsPage() {
                 : "text-gray-500"
             }`}
           >
-            Customize how ChatOG looks.
+            Customize how OLANIX looks.
           </p>
 
           <div className="flex items-center justify-between">
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                       : "text-gray-500"
                   }`}
                 >
-                  Use dark appearance across ChatOG.
+                  Use dark appearance across OLANIX.
                 </p>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                 : "text-gray-500"
             }`}
           >
-            Control how ChatOG notifies you.
+            Control how OLANIX notifies you.
           </p>
 
           <div className="flex items-center justify-between">
@@ -324,7 +324,7 @@ export default function SettingsPage() {
                       : "text-gray-500"
                   }`}
                 >
-                  Receive notifications from ChatOG.
+                  Receive notifications from OLANIX.
                 </p>
               </div>
             </div>
@@ -372,7 +372,7 @@ export default function SettingsPage() {
                 : "text-gray-500"
             }`}
           >
-            Manage your ChatOG privacy and account
+            Manage your OLANIX privacy and account
             settings.
           </p>
         </section>
