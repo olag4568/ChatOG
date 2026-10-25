@@ -2641,7 +2641,7 @@ export default function OLANIX() {
 
               <div className="relative shrink-0">
                 {showPlusMenu && (
-                  <div className={`absolute bottom-14 left-0 z-[150] w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border p-2 shadow-2xl ${
+                  <div className={`absolute bottom-14 left-0 z-[150] w-[min(300px,calc(100vw-2rem))] max-h-[min(360px,55dvh)] overflow-y-auto overscroll-contain rounded-2xl border p-1.5 shadow-2xl ${
                     isDarkMode ? "bg-[#242424] border-[#3a3a3a] text-white" : "bg-white border-[#e5e5e5] text-black"
                   }`}>
                     {[
@@ -2684,11 +2684,11 @@ export default function OLANIX() {
                               setActiveFeature(item.label);
                             }
                           }}
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition ${
                             isDarkMode ? "hover:bg-[#333333]" : "hover:bg-[#f3f3f3]"
                           }`}
                         >
-                          <ItemIcon size={19} className={`shrink-0 ${
+                          <ItemIcon size={17} className={`shrink-0 ${
                             item.action === "web-search" ? "text-sky-500" :
                             item.action === "create-image" ? "text-amber-500" :
                             item.action === "thinking" ? "text-violet-400" :
@@ -2696,8 +2696,8 @@ export default function OLANIX() {
                             isDarkMode ? "text-[#d4d4d8]" : "text-[#525252]"
                           }`} />
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm font-medium">{item.label}</span>
-                            <span className={`block truncate text-xs mt-0.5 ${
+                            <span className="block text-[13px] font-medium">{item.label}</span>
+                            <span className={`block truncate text-[11px] mt-0.5 ${
                               isDarkMode ? "text-[#a1a1aa]" : "text-[#737373]"
                             }`}>{item.detail}</span>
                           </span>
