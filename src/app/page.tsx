@@ -28,6 +28,10 @@ import {
   Plug,
   Code2,
   LibraryBig,
+  Clock3,
+  Folder,
+  Plus,
+  Search,
 } from "lucide-react";
 
 type Message = {
@@ -1650,14 +1654,14 @@ export default function OLANIX() {
       action: "new-chat",
     },
     {
-      name: "Explore",
-      icon: Compass,
-      action: "explore",
-    },
-    {
       name: "Images",
       icon: ImageIcon,
       action: "images",
+    },
+    {
+      name: "Scheduled",
+      icon: Clock3,
+      action: "scheduled",
     },
     {
       name: "Plugins",
@@ -1673,6 +1677,11 @@ export default function OLANIX() {
       name: "Library",
       icon: LibraryBig,
       action: "library",
+    },
+    {
+      name: "Explore",
+      icon: Compass,
+      action: "explore",
     },
   ];
 
@@ -1743,13 +1752,16 @@ export default function OLANIX() {
               : "border-[#e5e5e5]"
           }`}
         >
-          <div className="text-xl font-bold tracking-tight">
-            Chat
-            <span className="text-blue-500">
-              OG
-            </span>
-          </div>
+          <div className="text-xl font-bold tracking-tight">OLANIX</div>
 
+          <button
+            type="button"
+            aria-label="Search chats"
+            onClick={() => setActiveFeature("Search")}
+            className={`mr-2 w-9 h-9 flex items-center justify-center rounded-lg transition ${isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"}`}
+          >
+            <Search size={18} />
+          </button>
           <button
             type="button"
             onClick={toggleTheme}
@@ -1791,8 +1803,6 @@ export default function OLANIX() {
                     handleNewChat();
                   } else if (item.action === "images") {
                     imageInputRef.current?.click();
-                  } else if (item.action === "settings") {
-                    setShowSettings(true);
                   } else {
                     setActiveFeature(item.name);
                   }
@@ -1821,7 +1831,7 @@ export default function OLANIX() {
           <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-2 min-w-0">
               <History size={17} className="shrink-0 text-blue-500" />
-              <span className="text-sm font-semibold">History</span>
+              <span className="text-sm font-semibold">Recents</span>
             </div>
             <button
               type="button"
@@ -2567,11 +2577,9 @@ export default function OLANIX() {
             ? "absolute left-0 right-0 top-1/2 -translate-y-1/2"
             : "relative"
         }`}>
-          <div className={`mx-auto w-full max-w-xl ${
-            messages.length === 0 && !loading ? "min-h-[68px]" : ""
-          }`}>
+          <div className="mx-auto w-full max-w-2xl">
           <div
-            className={`relative border rounded-3xl px-4 shadow-2xl transition-all duration-200 ${
+            className={`relative border rounded-[2rem] px-3 shadow-lg transition-all duration-200 ${
               imagePreview
                 ? "pt-32 pb-2.5"
                 : "py-2.5"
@@ -2620,8 +2628,8 @@ export default function OLANIX() {
               className="hidden"
             />
 
-            <div className={`flex w-full items-center ${messages.length === 0 && !loading ? "min-h-[60px]" : "items-end"}`}>
-              {/* IMAGE */}
+            <div className={`flex w-full items-center gap-2 ${messages.length === 0 && !loading ? "min-h-[48px]" : "items-end"}`}>
+              {/* PLUS / UPLOAD */}
 
               <button
                 type="button"
@@ -2629,22 +2637,15 @@ export default function OLANIX() {
                   imageInputRef.current?.click()
                 }
                 disabled={loading}
-                className={`mr-3 mb-2 w-9 h-9 shrink-0 rounded-xl flex items-center justify-center transition ${
+                className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition ${
                   isDarkMode
                     ? "text-[#71717a] hover:bg-[#151515] hover:text-white"
                     : "text-[#737373] hover:bg-[#f3f3f3] hover:text-black"
                 }`}
                 aria-label="Upload image"
               >
-                <ImageIcon size={19} />
+                <Plus size={22} />
               </button>
-
-              {/* SPARKLE */}
-
-              <Sparkles
-                size={18}
-                className="text-blue-500 mr-3 mb-3 shrink-0"
-              />
 
               {/* TEXTAREA */}
 
@@ -2658,8 +2659,8 @@ export default function OLANIX() {
                 onKeyDown={
                   handleKeyDown
                 }
-                placeholder="Ask me anything..."
-                className={`flex-1 min-w-0 bg-transparent text-sm focus:outline-none resize-none leading-6 max-h-[180px] overflow-y-auto py-1 self-center ${
+                placeholder="Ask anything"
+                className={`flex-1 min-w-0 bg-transparent text-sm focus:outline-none resize-none leading-6 max-h-[180px] overflow-y-auto py-2 self-center ${
                   isDarkMode
                     ? "text-white placeholder-[#52525b]"
                     : "text-black placeholder-[#a3a3a3]"
