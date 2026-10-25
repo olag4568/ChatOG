@@ -769,6 +769,21 @@ export default function OLANIX() {
       } =
         await supabase.auth.getUser();
 
+      if (id.startsWith("guest-")) {
+        const guestChat = readGuestChats().find((chat) => chat.id === id);
+        if (!guestChat) {
+          alert("Could not open this guest conversation.");
+          return;
+        }
+
+        setChatId(id);
+        setMessages(guestChat.messages);
+        setInputMessage("");
+        removeSelectedImage();
+        window.history.replaceState({}, "", `/?chat=${id}`);
+        return;
+      }
+
       if (userError || !user) {
         router.push("/login");
         return;
@@ -872,32 +887,36 @@ export default function OLANIX() {
       } =
         await supabase.auth.getUser();
 
-      if (userError || !user) {
-        router.push("/login");
-        return;
-      }
+      if (id.startsWith("guest-")) {
+        writeGuestChats(readGuestChats().filter((chat) => chat.id !== id));
+      } else {
+        if (userError || !user) {
+          router.push("/login");
+          return;
+        }
 
-      const { error } =
-        await supabase
-          .from("chats")
-          .delete()
-          .eq("id", id)
-          .eq(
-            "user_id",
-            user.id
+        const { error } =
+          await supabase
+            .from("chats")
+            .delete()
+            .eq("id", id)
+            .eq(
+              "user_id",
+              user.id
+            );
+
+        if (error) {
+          console.error(
+            "DELETE CHAT ERROR:",
+            error
           );
 
-      if (error) {
-        console.error(
-          "DELETE CHAT ERROR:",
-          error
-        );
+          alert(
+            "Could not delete this conversation."
+          );
 
-        alert(
-          "Could not delete this conversation."
-        );
-
-        return;
+          return;
+        }
       }
 
       if (id === chatId) {
@@ -1445,30 +1464,23 @@ export default function OLANIX() {
         const canSaveChat = !authError && Boolean(user);
         setIsAuthenticated(canSaveChat);
 
-        if (canSaveChat) {
-          if (!chatToSave) {
-            chatToSave = await createChat(
-              textToSend || "Image Chat"
-            );
+        if (!chatToSave) {
+          chatToSave = await createChat(
+            textToSend || "Image Chat"
+          );
 
-            window.history.replaceState(
-              {},
-              "",
-              `/?chat=${chatToSave}`
-            );
-          }
-
-          if (!chatToSave) {
-            throw new Error("Chat ID was not created.");
-          }
-
-          await saveChatMessages(chatToSave, currentMessages);
-        } else {
-          // Guests can chat normally, but their conversations are session-only.
-          chatToSave = null;
-          setChatId(null);
-          window.history.replaceState({}, "", "/");
+          window.history.replaceState(
+            {},
+            "",
+            `/?chat=${chatToSave}`
+          );
         }
+
+        if (!chatToSave) {
+          throw new Error("Chat ID was not created.");
+        }
+
+        await saveChatMessages(chatToSave, currentMessages);
 
         const timezone =
           Intl.DateTimeFormat()
@@ -1926,14 +1938,14 @@ export default function OLANIX() {
                   isDarkMode ? "text-[#52525b]" : "text-[#a3a3a3]"
                 }`} />
                 <p className="text-xs font-medium">
-                  {isAuthenticated ? "No chat history" : "Log in to save chat history"}
+                  {isAuthenticated ? "No chat history" : "No guest history yet"}
                 </p>
                 <p className={`mt-1 text-[11px] leading-5 ${
                   isDarkMode ? "text-[#52525b]" : "text-[#a3a3a3]"
                 }`}>
                   {isAuthenticated
                     ? "Your conversations will appear here."
-                    : "Log in or sign up to keep your conversations."}
+                    : "Guest conversations are saved in this browser."}
                 </p>
                 {!isAuthenticated && (
                   <button
