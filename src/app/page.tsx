@@ -38,7 +38,6 @@ import {
   FlaskConical,
   Pencil,
   Brain,
-  Github,
   ExternalLink,
 } from "lucide-react";
 
@@ -2653,7 +2652,7 @@ export default function OLANIX() {
                       { label: "Deep research", detail: "Explore a topic in depth", icon: FlaskConical, action: "deep-research" },
                       { label: "Sketch", detail: "Open sketch workspace", icon: Pencil, action: "sketch" },
                       { label: "Thinking", detail: "Reason through a harder question", icon: Brain, action: "thinking" },
-                      { label: "GitHub", detail: "Open GitHub connection", icon: Github, action: "github" },
+                      { label: "GitHub", detail: "Open GitHub connection", icon: Code2, action: "github" },
                       { label: "OpenAI Platform", detail: "Manage API keys and usage", icon: ExternalLink, action: "openai" },
                       { label: "Notion", detail: "Connect notes and documents", icon: LibraryBig, action: "notion" },
                     ].map((item) => {
