@@ -702,6 +702,11 @@ export default function OLANIX() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
+        setRecentChats(
+          readGuestChats()
+            .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+            .map(({ id, title, updated_at }) => ({ id, title, updated_at }))
+        );
         return;
       }
 
@@ -1235,18 +1240,27 @@ export default function OLANIX() {
     } =
       await supabase.auth.getUser();
 
-    if (userError || !user) {
-      throw new Error(
-        "You must be logged in to save chat history."
-      );
-    }
-
     const chatTitle =
       firstMessage.trim()
         ? firstMessage
             .trim()
             .slice(0, 50)
         : "Image Chat";
+
+    if (userError || !user) {
+      const id = `guest-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const guestChats = readGuestChats();
+      guestChats.unshift({
+        id,
+        title: chatTitle,
+        updated_at: new Date().toISOString(),
+        messages: [],
+      });
+      writeGuestChats(guestChats);
+      setChatId(id);
+      await loadRecentChats();
+      return id;
+    }
 
     const { data, error } =
       await supabase
@@ -1294,10 +1308,22 @@ export default function OLANIX() {
     } =
       await supabase.auth.getUser();
 
-    if (userError || !user) {
-      throw new Error(
-        "You must be logged in to save chat history."
-      );
+    if (userError || !user || currentChatId.startsWith("guest-")) {
+      const guestChats = readGuestChats();
+      const existingIndex = guestChats.findIndex((chat) => chat.id === currentChatId);
+      if (existingIndex === -1) {
+        throw new Error("Could not find this guest conversation in this browser.");
+      }
+
+      guestChats[existingIndex] = {
+        ...guestChats[existingIndex],
+        messages: chatMessages,
+        updated_at: new Date().toISOString(),
+      };
+      guestChats.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      writeGuestChats(guestChats);
+      await loadRecentChats();
+      return;
     }
 
     const { data, error } =
