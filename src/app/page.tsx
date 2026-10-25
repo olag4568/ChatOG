@@ -32,6 +32,14 @@ import {
   Folder,
   Plus,
   Search,
+  Paperclip,
+  ImagePlus,
+  Globe,
+  FlaskConical,
+  Pencil,
+  Brain,
+  Github,
+  ExternalLink,
 } from "lucide-react";
 
 type Message = {
@@ -104,6 +112,7 @@ export default function OLANIX() {
   const [showSettings, setShowSettings] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
+  const [showPlusMenu, setShowPlusMenu] = useState(false);
 
   // =====================================================
   // MEMORY
@@ -2621,7 +2630,7 @@ export default function OLANIX() {
             <input
               ref={imageInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,.pdf,.txt,.doc,.docx,.csv,.xlsx,.md"
               onChange={
                 handleImageSelect
               }
@@ -2631,21 +2640,88 @@ export default function OLANIX() {
             <div className={`flex w-full items-center gap-2 ${messages.length === 0 && !loading ? "min-h-[48px]" : "items-end"}`}>
               {/* PLUS / UPLOAD */}
 
-              <button
-                type="button"
-                onClick={() =>
-                  imageInputRef.current?.click()
-                }
-                disabled={loading}
-                className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition ${
-                  isDarkMode
-                    ? "text-[#71717a] hover:bg-[#151515] hover:text-white"
-                    : "text-[#737373] hover:bg-[#f3f3f3] hover:text-black"
-                }`}
-                aria-label="Upload image"
-              >
-                <Plus size={22} />
-              </button>
+              <div className="relative shrink-0">
+                {showPlusMenu && (
+                  <div className={`absolute bottom-14 left-0 z-[150] w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border p-2 shadow-2xl ${
+                    isDarkMode ? "bg-[#242424] border-[#3a3a3a] text-white" : "bg-white border-[#e5e5e5] text-black"
+                  }`}>
+                    {[
+                      { label: "Add photos & files", detail: "Upload from computer", icon: Paperclip, action: "upload" },
+                      { label: "Add from library", detail: "Browse saved content", icon: LibraryBig, action: "library" },
+                      { label: "Create image", detail: "Describe an image to create", icon: ImagePlus, action: "create-image" },
+                      { label: "Web search", detail: "Ask for current web information", icon: Globe, action: "web-search" },
+                      { label: "Deep research", detail: "Explore a topic in depth", icon: FlaskConical, action: "deep-research" },
+                      { label: "Sketch", detail: "Open sketch workspace", icon: Pencil, action: "sketch" },
+                      { label: "Thinking", detail: "Reason through a harder question", icon: Brain, action: "thinking" },
+                      { label: "GitHub", detail: "Open GitHub connection", icon: Github, action: "github" },
+                      { label: "OpenAI Platform", detail: "Manage API keys and usage", icon: ExternalLink, action: "openai" },
+                      { label: "Notion", detail: "Connect notes and documents", icon: LibraryBig, action: "notion" },
+                    ].map((item) => {
+                      const ItemIcon = item.icon;
+                      return (
+                        <button
+                          key={item.action}
+                          type="button"
+                          onClick={() => {
+                            setShowPlusMenu(false);
+                            if (item.action === "upload") {
+                              imageInputRef.current?.click();
+                            } else if (item.action === "web-search" || item.action === "deep-research" || item.action === "thinking" || item.action === "create-image") {
+                              const prompts: Record<string, string> = {
+                                "web-search": "Search the web for current, reliable information about: ",
+                                "deep-research": "Conduct deep research on this topic, compare reliable sources, and provide citations: ",
+                                "thinking": "Think carefully through this problem step by step, checking assumptions and explaining the reasoning clearly: ",
+                                "create-image": "Help me create an image. Write a detailed image-generation prompt for: ",
+                              };
+                              setInputMessage((current) => current ? current + "\n" + prompts[item.action] : prompts[item.action]);
+                              textareaRef.current?.focus();
+                            } else if (item.action === "github") {
+                              GenUI.openUrl("https://github.com");
+                            } else if (item.action === "openai") {
+                              GenUI.openUrl("https://platform.openai.com");
+                            } else if (item.action === "notion") {
+                              GenUI.openUrl("https://www.notion.so");
+                            } else {
+                              setActiveFeature(item.label);
+                            }
+                          }}
+                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                            isDarkMode ? "hover:bg-[#333333]" : "hover:bg-[#f3f3f3]"
+                          }`}
+                        >
+                          <ItemIcon size={19} className={`shrink-0 ${
+                            item.action === "web-search" ? "text-sky-500" :
+                            item.action === "create-image" ? "text-amber-500" :
+                            item.action === "thinking" ? "text-violet-400" :
+                            item.action === "deep-research" ? "text-blue-500" :
+                            isDarkMode ? "text-[#d4d4d8]" : "text-[#525252]"
+                          }`} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-medium">{item.label}</span>
+                            <span className={`block truncate text-xs mt-0.5 ${
+                              isDarkMode ? "text-[#a1a1aa]" : "text-[#737373]"
+                            }`}>{item.detail}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPlusMenu((open) => !open)}
+                  disabled={loading}
+                  className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition ${
+                    isDarkMode
+                      ? "text-[#d4d4d8] hover:bg-[#151515] hover:text-white"
+                      : "text-[#525252] hover:bg-[#f3f3f3] hover:text-black"
+                  }`}
+                  aria-label="Open attachments and tools"
+                  aria-expanded={showPlusMenu}
+                >
+                  <Plus size={22} />
+                </button>
+              </div>
 
               {/* TEXTAREA */}
 
