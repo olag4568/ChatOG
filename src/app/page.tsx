@@ -52,7 +52,44 @@ type Chat = {
   id: string;
   title: string | null;
   updated_at: string;
+  messages?: Message[];
 };
+
+type GuestChat = Chat & {
+  messages: Message[];
+};
+
+const GUEST_CHATS_KEY = "olanix_guest_chats";
+
+function readGuestChats(): GuestChat[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const stored = window.localStorage.getItem(GUEST_CHATS_KEY);
+    if (!stored) return [];
+    const parsed: unknown = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((chat): chat is GuestChat =>
+      Boolean(
+        chat &&
+        typeof chat === "object" &&
+        typeof chat.id === "string" &&
+        chat.id.startsWith("guest-") &&
+        typeof chat.title === "string" &&
+        typeof chat.updated_at === "string" &&
+        Array.isArray(chat.messages)
+      )
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeGuestChats(chats: GuestChat[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(GUEST_CHATS_KEY, JSON.stringify(chats));
+}
 
 type LocationStatus =
   | "unknown"
