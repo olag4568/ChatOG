@@ -2750,11 +2750,11 @@ export default function OLANIX() {
                               setInputMessage((current) => current ? current + "\n" + prompts[item.action] : prompts[item.action]);
                               textareaRef.current?.focus();
                             } else if (item.action === "github") {
-                              GenUI.openUrl("https://github.com");
+                              window.open("https://github.com", "_blank", "noopener,noreferrer");
                             } else if (item.action === "openai") {
-                              GenUI.openUrl("https://platform.openai.com");
+                              window.open("https://platform.openai.com", "_blank", "noopener,noreferrer");
                             } else if (item.action === "notion") {
-                              GenUI.openUrl("https://www.notion.so");
+                              window.open("https://www.notion.so", "_blank", "noopener,noreferrer");
                             } else {
                               setActiveFeature(item.label);
                             }
