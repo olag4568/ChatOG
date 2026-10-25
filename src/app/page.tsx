@@ -1754,7 +1754,7 @@ export default function OLANIX() {
         {/* LOGO */}
 
         <div
-          className={`h-20 flex items-center justify-between px-5 border-b ${
+          className={`h-16 shrink-0 flex items-center justify-between px-4 border-b ${
             isDarkMode
               ? "border-[#1a1a1a]"
               : "border-[#e5e5e5]"
@@ -1796,7 +1796,7 @@ export default function OLANIX() {
 
         {/* MENU */}
 
-        <nav className="shrink-0 p-4 space-y-2">
+        <nav className="shrink-0 px-3 py-2 space-y-0.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
@@ -1815,7 +1815,7 @@ export default function OLANIX() {
                     setActiveFeature(item.name);
                   }
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${
                   isDarkMode
                     ? "text-[#a1a1aa] hover:bg-[#111111] hover:text-white"
                     : "text-[#525252] hover:bg-[#f3f3f3] hover:text-black"
