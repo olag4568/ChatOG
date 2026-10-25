@@ -1743,7 +1743,7 @@ export default function OLANIX() {
           ================================================= */}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[min(408px,85vw)] shrink-0 border-r flex flex-col transition-transform duration-300 md:static md:z-auto md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-[min(280px,85vw)] shrink-0 border-r flex flex-col transition-transform duration-300 md:static md:z-auto md:translate-x-0 ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } ${
           isDarkMode
