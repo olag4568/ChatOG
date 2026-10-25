@@ -2572,9 +2572,9 @@ export default function OLANIX() {
             INPUT
             ================================================= */}
 
-        <div className={`z-20 w-full max-w-[920px] mx-auto px-5 pb-6 pt-2 transition-all duration-200 ${
+        <div className={`z-20 w-full max-w-[920px] mx-auto px-3 sm:px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 transition-all duration-200 ${
           messages.length === 0 && !loading
-            ? "absolute left-0 right-0 top-1/2 -translate-y-1/2"
+            ? "absolute left-0 right-0 top-1/2 -translate-y-1/2 md:top-1/2"
             : "relative"
         }`}>
           <div className="mx-auto w-full max-w-none">
