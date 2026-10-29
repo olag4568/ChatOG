@@ -1963,7 +1963,7 @@ export default function OLANIX() {
                     <>
                     <button
                       type="button"
-                      onClick={() => openChat(chat.id)
+                      onClick={() => openChat(chat.id)}
                       className={`flex-1 min-w-0 rounded-xl px-3 py-3 text-left text-xs transition ${
                         isDarkMode
                           ? "text-[#a1a1aa] hover:text-white"
