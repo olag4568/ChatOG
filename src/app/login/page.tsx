@@ -11,6 +11,13 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "oauth_callback") {
+      setMessage("Google sign-in could not be completed. Check the Supabase Google provider and redirect URL settings, then try again.");
+    }
+  });
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -34,15 +41,20 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      setMessage(error.message);
+      if (error) {
+        setMessage(error.message);
+        setLoading(false);
+      }
+    } catch {
+      setMessage("Could not start Google sign-in. Check your Supabase URL, anon key, and Google provider settings.");
       setLoading(false);
     }
   }
