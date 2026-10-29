@@ -84,7 +84,15 @@ export async function POST(req: Request) {
       | "pro"
       | "owner" = "free";
 
-    let memoryContext = "";
+    const guestMemories: string[] = Array.isArray(body?.guestMemories)
+      ? body.guestMemories
+          .filter((item: unknown): item is string => typeof item === "string")
+          .map((item: string) => item.trim().slice(0, 500))
+          .filter((item: string) => item.length > 0)
+          .slice(0, 20)
+      : [];
+
+    let memoryContext = guestMemories.map((item) => `- ${item}`).join("\n");
     let savedMemory: string | null = null;
 
     try {
@@ -135,9 +143,8 @@ export async function POST(req: Request) {
         // MEMORY ACCESS
         // ======================================
 
-        const hasMemoryAccess =
-          userRole === "owner" ||
-          userRole === "pro";
+        // Payment restrictions are intentionally disabled during feature development.
+        const hasMemoryAccess = true;
 
         const canUseMemory =
           hasMemoryAccess &&
@@ -387,13 +394,9 @@ ${message}
     // 6. MEMORY ACCESS
     // ==========================================
 
-    const memoryAccess =
-      userRole === "owner" ||
-      userRole === "pro";
-
-    const actualMemoryEnabled =
-      memoryAccess &&
-      memoryEnabled;
+    // All account types can use memory while the full feature set is being built.
+    const memoryAccess = true;
+    const actualMemoryEnabled = memoryEnabled;
 
     // ==========================================
     // 7. USER TIMEZONE
