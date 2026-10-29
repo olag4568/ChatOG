@@ -55,22 +55,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl border border-[#292929] bg-[#111] p-3 text-sm font-medium transition hover:bg-[#181818] disabled:opacity-50"
-          >
-            <span className="text-lg font-bold">G</span>
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3 my-5">
-            <div className="h-px flex-1 bg-[#292929]" />
-            <span className="text-xs text-gray-600">OR</span>
-            <div className="h-px flex-1 bg-[#292929]" />
-          </div>
-
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
