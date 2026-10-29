@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -11,12 +11,12 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("error") === "oauth_callback") {
       setMessage("Google sign-in could not be completed. Check the Supabase Google provider and redirect URL settings, then try again.");
     }
-  });
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
