@@ -37,6 +37,7 @@ import {
   Globe,
   FlaskConical,
   Pencil,
+  Copy,
   Check,
   Brain,
   ExternalLink,
@@ -2519,19 +2520,58 @@ export default function OLANIX() {
 
                             pre: ({
                               children,
-                            }) => (
-                              <pre
-                                className={`overflow-x-auto rounded-xl p-4 my-4 text-sm ${
+                            }) => {
+                              const codeNode = children as {
+                                props?: { children?: unknown; className?: string };
+                              };
+                              const codeText =
+                                typeof codeNode?.props?.children === "string"
+                                  ? codeNode.props.children.replace(/\\n$/, "")
+                                  : "";
+
+                              return (
+                                <div className={`my-4 overflow-hidden rounded-xl border ${
                                   isDarkMode
-                                    ? "bg-[#050505] border border-[#252525]"
-                                    : "bg-[#f5f5f5] border border-[#e5e5e5]"
-                                }`}
-                              >
-                                {
-                                  children
-                                }
-                              </pre>
-                            ),
+                                    ? "border-[#252525] bg-[#050505]"
+                                    : "border-[#e5e5e5] bg-[#f5f5f5]"
+                                }`}>
+                                  <div className={`flex items-center justify-between px-3 py-2 text-xs ${
+                                    isDarkMode
+                                      ? "border-b border-[#252525] text-gray-400"
+                                      : "border-b border-[#e5e5e5] text-gray-600"
+                                  }`}>
+                                    <span>
+                                      {codeNode?.props?.className?.replace("language-", "") || "Code"}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(codeText);
+                                        } catch (error) {
+                                          console.error("Could not copy code:", error);
+                                        }
+                                      }}
+                                      className={`rounded-md px-2 py-1 transition-colors ${
+                                        isDarkMode
+                                          ? "hover:bg-[#202020] hover:text-white"
+                                          : "hover:bg-[#e7e7e7] hover:text-black"
+                                      }`}
+                                      aria-label="Copy code"
+                                      title="Copy code"
+                                    >
+                                      <span className="inline-flex items-center gap-1">
+                                        <Copy size={14} />
+                                        Copy code
+                                      </span>
+                                    </button>
+                                  </div>
+                                  <pre className="overflow-x-auto p-4 text-sm">
+                                    {children}
+                                  </pre>
+                                </div>
+                              );
+                            },
                           }}
                         >
                           {msg.text}
