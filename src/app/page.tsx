@@ -159,9 +159,30 @@ export default function OLANIX() {
   const [accountRole, setAccountRole] =
     useState<AccountRole>("free");
 
-  const memoryAccess =
-    accountRole === "pro" ||
-    accountRole === "owner";
+  // All account types can use memory during the initial build.
+  const memoryAccess = true;
+
+  const GUEST_MEMORY_KEY = "olanix_guest_memory";
+
+  function readGuestMemory(): string[] {
+    try {
+      const stored = window.localStorage.getItem(GUEST_MEMORY_KEY);
+      const parsed: unknown = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === "string").slice(0, 20)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeGuestMemory(items: string[]) {
+    try {
+      window.localStorage.setItem(GUEST_MEMORY_KEY, JSON.stringify(items.slice(0, 20)));
+    } catch (error) {
+      console.warn("Could not save guest memory locally.", error);
+    }
+  }
 
   // =====================================================
   // IMAGE
@@ -235,7 +256,7 @@ export default function OLANIX() {
       if (userError || !user) {
         setIsAuthenticated(false);
         setAccountRole("free");
-        setMemoryEnabled(false);
+        setMemoryEnabled(true);
         return;
       }
 
@@ -254,7 +275,7 @@ export default function OLANIX() {
         );
 
         setAccountRole("free");
-        setMemoryEnabled(false);
+        setMemoryEnabled(true);
 
         return;
       }
@@ -276,10 +297,7 @@ export default function OLANIX() {
       // FREE USERS
       // =================================================
 
-      if (role === "free") {
-        setMemoryEnabled(false);
-        return;
-      }
+      // Memory stays enabled for Free, Pro, and Owner accounts during development.
 
       // =================================================
       // PRO / OWNER
@@ -311,12 +329,6 @@ export default function OLANIX() {
   // =====================================================
 
   const toggleMemory = async () => {
-    // Free users cannot use memory
-    if (!memoryAccess) {
-      setMemoryEnabled(false);
-      return;
-    }
-
     const newValue = !memoryEnabled;
 
     // Update UI immediately
@@ -1513,10 +1525,8 @@ export default function OLANIX() {
                 currentDate:
                   new Date().toISOString(),
 
-                memoryEnabled:
-                  memoryAccess
-                    ? memoryEnabled
-                    : false,
+                memoryEnabled,
+                guestMemories: readGuestMemory(),
               }),
             }
           );
@@ -1572,6 +1582,13 @@ export default function OLANIX() {
           setMemoryEnabled(
             data.memory.enabled
           );
+        }
+
+        if (data.memory?.savedText && !canSaveChat) {
+          const existingGuestMemory = readGuestMemory();
+          if (!existingGuestMemory.includes(data.memory.savedText)) {
+            writeGuestMemory([data.memory.savedText, ...existingGuestMemory]);
+          }
         }
 
         const aiMessage: Message = {
@@ -3198,9 +3215,7 @@ export default function OLANIX() {
                     onClick={
                       toggleMemory
                     }
-                    disabled={
-                      !memoryAccess
-                    }
+                    disabled={false}
                     className={`relative w-12 h-7 shrink-0 rounded-full transition ${
                       !memoryAccess
                         ? "bg-[#333333] opacity-50 cursor-not-allowed"
@@ -3233,9 +3248,7 @@ export default function OLANIX() {
                       : "border-[#e5e5e5] text-[#a3a3a3]"
                   }`}
                 >
-                  {!memoryAccess
-                    ? "Memory is available on Pro and Owner accounts."
-                    : memoryEnabled
+                  {memoryEnabled
                     ? "Memory is enabled for OLANIX."
                     : "Memory is turned off."}
                 </div>
