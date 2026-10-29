@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -11,50 +11,32 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("error") === "oauth_callback") {
-      setMessage("Google sign-in could not be completed. Check the Supabase Google provider and redirect URL settings, then try again.");
-    }
-  }, []);
-
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@gmail\.com$/i.test(normalizedEmail)) {
+      setMessage("Please use a Gmail address ending in @gmail.com.");
       return;
     }
 
-    window.location.href = "/";
-  }
-
-  async function handleGoogleLogin() {
     setLoading(true);
-    setMessage("");
-
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const { error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
       });
 
       if (error) {
         setMessage(error.message);
-        setLoading(false);
+        return;
       }
+
+      window.location.href = "/";
     } catch {
-      setMessage("Could not start Google sign-in. Check your Supabase URL, anon key, and Google provider settings.");
+      setMessage("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
     }
   }
@@ -92,9 +74,10 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Gmail address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoCapitalize="none"
               className="w-full rounded-xl border border-[#292929] bg-[#111] p-3 text-white outline-none transition focus:border-blue-500"
               autoComplete="email"
               required
