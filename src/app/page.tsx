@@ -325,97 +325,6 @@ export default function OLANIX() {
   };
 
   // =====================================================
-  // TOGGLE MEMORY
-  // =====================================================
-
-  const toggleMemory = async () => {
-    const newValue = !memoryEnabled;
-
-    // Update UI immediately
-    setMemoryEnabled(newValue);
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        setMemoryEnabled(!newValue);
-        return;
-      }
-
-      const {
-        data: existingSettings,
-        error: settingsError,
-      } = await supabase
-        .from("user_settings")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (settingsError) {
-        console.warn(
-          "MEMORY SETTINGS CHECK ERROR:",
-          settingsError
-        );
-
-        setMemoryEnabled(!newValue);
-        return;
-      }
-
-      if (existingSettings) {
-        const { error } =
-          await supabase
-            .from("user_settings")
-            .update({
-              memory_enabled: newValue,
-            })
-            .eq("user_id", user.id);
-
-        if (error) {
-          console.warn(
-            "MEMORY SETTING UPDATE ERROR:",
-            error
-          );
-
-          setMemoryEnabled(!newValue);
-          return;
-        }
-      } else {
-        // Do NOT manually set role to free here.
-        // The database default will handle new accounts.
-        const { error } =
-          await supabase
-            .from("user_settings")
-            .insert({
-              user_id: user.id,
-              dark_mode: isDarkMode,
-              notifications: true,
-              memory_enabled: newValue,
-            });
-
-        if (error) {
-          console.warn(
-            "MEMORY SETTING INSERT ERROR:",
-            error
-          );
-
-          setMemoryEnabled(!newValue);
-          return;
-        }
-      }
-    } catch (error) {
-      console.warn(
-        "MEMORY SETTING SAVE ERROR:",
-        error
-      );
-
-      setMemoryEnabled(!newValue);
-    }
-  };
-
-  // =====================================================
   // THEME — LOAD
   // =====================================================
 
@@ -3210,35 +3119,16 @@ export default function OLANIX() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={
-                      toggleMemory
-                    }
-                    disabled={false}
-                    className={`relative w-12 h-7 shrink-0 rounded-full transition ${
-                      !memoryAccess
-                        ? "bg-[#333333] opacity-50 cursor-not-allowed"
-                        : memoryEnabled
-                        ? "bg-blue-600"
-                        : isDarkMode
-                        ? "bg-[#333333]"
-                        : "bg-[#d4d4d4]"
+                  <div
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+                      isDarkMode
+                        ? "bg-blue-500/15 text-blue-400"
+                        : "bg-blue-50 text-blue-700"
                     }`}
-                    aria-label="Toggle memory"
-                    aria-pressed={
-                      memoryEnabled
-                    }
+                    aria-label="Memory is always enabled"
                   >
-                    <span
-                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                        memoryEnabled &&
-                        memoryAccess
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                      }`}
-                    />
-                  </button>
+                    Always on
+                  </div>
                 </div>
 
                 <div
@@ -3248,9 +3138,7 @@ export default function OLANIX() {
                       : "border-[#e5e5e5] text-[#a3a3a3]"
                   }`}
                 >
-                  {memoryEnabled
-                    ? "Memory is enabled for OLANIX."
-                    : "Memory is turned off."}
+                  "Memory is enabled for OLANIX."
                 </div>
               </div>
 
