@@ -1486,6 +1486,19 @@ export default function OLANIX() {
 
                 memoryEnabled,
                 guestMemories: readGuestMemory(),
+                history: currentMessages
+                  .slice(0, -1)
+                  .filter(
+                    (item) =>
+                      (item.sender === "user" || item.sender === "ai") &&
+                      typeof item.text === "string" &&
+                      item.text.trim().length > 0
+                  )
+                  .slice(-12)
+                  .map((item) => ({
+                    role: item.sender === "ai" ? "assistant" : "user",
+                    content: item.text.slice(0, 6000),
+                  })),
               }),
             }
           );
