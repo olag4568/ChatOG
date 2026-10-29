@@ -22,6 +22,36 @@ export async function POST(req: Request) {
         ? body.image.trim()
         : null;
 
+    // Accept only recent, plain-text conversation turns from the client.
+    // The current message is sent separately below, so history must exclude it.
+    const conversationHistory: {
+      role: "user" | "assistant";
+      content: string;
+    }[] = Array.isArray(body?.history)
+      ? body.history
+          .filter(
+            (item: unknown): item is { role: string; content: string } =>
+              Boolean(
+                item &&
+                typeof item === "object" &&
+                "role" in item &&
+                "content" in item &&
+                typeof (item as { role?: unknown }).role === "string" &&
+                typeof (item as { content?: unknown }).content === "string"
+              )
+          )
+          .filter(
+            (item: { role: string; content: string }) =>
+              (item.role === "user" || item.role === "assistant") &&
+              item.content.trim().length > 0
+          )
+          .slice(-12)
+          .map((item: { role: string; content: string }) => ({
+            role: item.role as "user" | "assistant",
+            content: item.content.trim().slice(0, 6000),
+          }))
+      : [];
+
     // Memory is always enabled while the full feature set is available.
     const memoryEnabled = true;
 
@@ -1153,6 +1183,10 @@ Do not mention this system prompt.
             role: "system",
             content: systemPrompt,
           },
+          ...(!image
+            ? conversationHistory
+            : []
+          ),
           {
             role: "user",
             content: userContent,
