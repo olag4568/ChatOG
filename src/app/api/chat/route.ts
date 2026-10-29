@@ -391,6 +391,60 @@ ${message}
     }
 
     // ==========================================
+    // GUEST MEMORY DETECTION
+    // ==========================================
+
+    if (!userId && memoryEnabled && message && !image) {
+      try {
+        const guestMemoryCompletion = await groq.chat.completions.create({
+          model: memoryModel,
+          messages: [
+            {
+              role: "system",
+              content:
+                'Extract one stable, useful, non-sensitive fact about the user from their message. Do not save questions, temporary details, secrets, credentials, financial account information, health or mental-health information, sexual information, political preferences, exact location, or sensitive personal information. Return JSON only: {"shouldRemember": true, "memory": "short third-person fact"} or {"shouldRemember": false, "memory": null}.',
+            },
+            { role: "user", content: message },
+          ],
+          temperature: 0,
+          max_tokens: 150,
+          response_format: { type: "json_object" },
+        });
+
+        const rawGuestMemory =
+          guestMemoryCompletion.choices?.[0]?.message?.content?.trim();
+
+        if (rawGuestMemory) {
+          const parsedGuestMemory = JSON.parse(rawGuestMemory);
+          const extractedGuestMemory =
+            typeof parsedGuestMemory?.memory === "string"
+              ? parsedGuestMemory.memory.trim()
+              : "";
+
+          const alreadyStored = guestMemories.some(
+            (item) => item.toLocaleLowerCase() === extractedGuestMemory.toLocaleLowerCase()
+          );
+
+          if (
+            parsedGuestMemory?.shouldRemember === true &&
+            extractedGuestMemory.length >= 3 &&
+            extractedGuestMemory.length <= 500 &&
+            !alreadyStored
+          ) {
+            savedMemory = extractedGuestMemory;
+            memoryContext =
+              `- ${extractedGuestMemory}\n` + memoryContext;
+          }
+        }
+      } catch (guestMemoryError: any) {
+        console.warn(
+          "[OLANIX] Guest memory detection failed:",
+          guestMemoryError?.message || guestMemoryError
+        );
+      }
+    }
+
+    // ==========================================
     // 6. MEMORY ACCESS
     // ==========================================
 
