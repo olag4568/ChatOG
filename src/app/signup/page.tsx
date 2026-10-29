@@ -91,7 +91,7 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full rounded-xl bg-blue-600 p-3 font-medium text-white transition hover:bg-blue-500 disabled:opacity-50"
         >
-          Sign Up
+          {loading ? "Creating account..." : "Sign Up"}
         </button>
 
         {message && (
