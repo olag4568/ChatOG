@@ -37,6 +37,7 @@ import {
   Globe,
   FlaskConical,
   Pencil,
+  Check,
   Brain,
   ExternalLink,
 } from "lucide-react";
@@ -130,6 +131,9 @@ export default function OLANIX() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatId, setChatId] = useState<string | null>(null);
   const [recentChats, setRecentChats] = useState<Chat[]>([]);
+  const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
+  const [renamingChatTitle, setRenamingChatTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -782,6 +786,51 @@ export default function OLANIX() {
       ) {
         setLoading(false);
       }
+    }
+  };
+
+  // =====================================================
+  // RENAME CHAT
+  // =====================================================
+
+  const renameChat = async (id: string) => {
+    const title = renamingChatTitle.trim();
+    if (!title) {
+      alert("Chat title cannot be empty.");
+      return;
+    }
+
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (id.startsWith("guest-")) {
+        const guestChats = readGuestChats();
+        const index = guestChats.findIndex((chat) => chat.id === id);
+        if (index < 0) {
+          alert("Could not find this guest conversation.");
+          return;
+        }
+        guestChats[index] = { ...guestChats[index], title, updated_at: new Date().toISOString() };
+        writeGuestChats(guestChats);
+      } else {
+        if (userError || !user) {
+          router.push("/login");
+          return;
+        }
+        const { error } = await supabase
+          .from("chats")
+          .update({ title, updated_at: new Date().toISOString() })
+          .eq("id", id)
+          .eq("user_id", user.id);
+        if (error) throw error;
+      }
+
+      setRenamingChatId(null);
+      setRenamingChatTitle("");
+      await loadRecentChats();
+    } catch (error) {
+      console.error("RENAME CHAT ERROR:", error);
+      alert("Could not rename this conversation. Please try again.");
     }
   };
 
@@ -1842,6 +1891,18 @@ export default function OLANIX() {
             </button>
           </div>
 
+          <div className="px-3 pb-2">
+            <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${isDarkMode ? "border-[#222] bg-[#0b0b0b] text-[#737373]" : "border-[#e5e5e5] bg-white text-[#737373]"}`}>
+              <Search size={14} />
+              <input
+                value={chatSearchQuery}
+                onChange={(event) => setChatSearchQuery(event.target.value)}
+                placeholder="Search chats..."
+                aria-label="Search chats"
+                className={`w-full min-w-0 bg-transparent text-xs outline-none ${isDarkMode ? "text-white placeholder:text-[#52525b]" : "text-black placeholder:text-[#a3a3a3]"}`}
+              />
+            </div>
+          </div>
           <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
             {recentChats.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-2 py-6 text-center">
@@ -1870,7 +1931,7 @@ export default function OLANIX() {
               </div>
             ) : (
               <div className="space-y-1">
-                {recentChats.map((chat) => (
+                {recentChats.filter((chat) => (chat.title || "Untitled chat").toLowerCase().includes(chatSearchQuery.trim().toLowerCase())).map((chat) => (
                   <div
                     key={chat.id}
                     className={`group flex min-w-0 items-center gap-1 rounded-xl transition ${
@@ -1879,9 +1940,30 @@ export default function OLANIX() {
                         : isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"
                     }`}
                   >
+                    {renamingChatId === chat.id ? (
+                      <form
+                        className="flex min-w-0 flex-1 items-center gap-1 px-2 py-2"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          void renameChat(chat.id);
+                        }}
+                      >
+                        <input
+                          autoFocus
+                          value={renamingChatTitle}
+                          onChange={(event) => setRenamingChatTitle(event.target.value)}
+                          maxLength={80}
+                          aria-label="Rename conversation"
+                          className={`min-w-0 flex-1 rounded-md border px-2 py-1.5 text-xs outline-none ${isDarkMode ? "border-[#333] bg-black text-white" : "border-[#ddd] bg-white text-black"}`}
+                        />
+                        <button type="submit" className="text-emerald-500" aria-label="Save title"><Check size={14} /></button>
+                        <button type="button" onClick={() => { setRenamingChatId(null); setRenamingChatTitle(""); }} className="text-[#888]" aria-label="Cancel rename"><X size={14} /></button>
+                      </form>
+                    ) : (
+                    <>
                     <button
                       type="button"
-                      onClick={() => openChat(chat.id)}
+                      onClick={() => openChat(chat.id)
                       className={`flex-1 min-w-0 rounded-xl px-3 py-3 text-left text-xs transition ${
                         isDarkMode
                           ? "text-[#a1a1aa] hover:text-white"
@@ -1892,6 +1974,19 @@ export default function OLANIX() {
                       <span className="block truncate">
                         {chat.title || "Untitled chat"}
                       </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setRenamingChatId(chat.id);
+                        setRenamingChatTitle(chat.title || "");
+                      }}
+                      className={`mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition ${isDarkMode ? "text-[#71717a] hover:bg-[#252525] hover:text-blue-400" : "text-[#737373] hover:bg-[#e5e5e5] hover:text-blue-600"}`}
+                      aria-label="Rename chat"
+                      title="Rename chat"
+                    >
+                      <Pencil size={13} />
                     </button>
                     <button
                       type="button"
@@ -1909,6 +2004,8 @@ export default function OLANIX() {
                     >
                       <Trash2 size={14} />
                     </button>
+                    </>
+                    )}
                   </div>
                 ))}
               </div>
