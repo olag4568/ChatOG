@@ -22,8 +22,8 @@ export async function POST(req: Request) {
         ? body.image.trim()
         : null;
 
-    const memoryEnabled =
-      body?.memoryEnabled === true;
+    // Memory is always enabled while the full feature set is available.
+    const memoryEnabled = true;
 
     if (!message && !image) {
       return NextResponse.json(
