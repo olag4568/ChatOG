@@ -9,6 +9,10 @@ import {
   Trash2,
   Loader2,
   RefreshCw,
+  Search,
+  Pencil,
+  X,
+  Check,
 } from "lucide-react";
 
 type Message = {
@@ -35,6 +39,10 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameTitle, setRenameTitle] = useState("");
+  const [savingRename, setSavingRename] = useState(false);
 
   // ============================================
   // LOAD CHAT HISTORY
@@ -137,6 +145,60 @@ export default function HistoryPage() {
   };
 
   // ============================================
+  // RENAME CHAT
+  // ============================================
+
+  const renameChat = async (id: string) => {
+    const title = renameTitle.trim();
+    if (!title) {
+      setErrorMessage("Chat title cannot be empty.");
+      return;
+    }
+
+    setSavingRename(true);
+    setErrorMessage("");
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("chats")
+        .update({ title, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select("id, title, messages, created_at, updated_at")
+        .single();
+
+      if (error || !data) {
+        console.error("Rename chat error:", error);
+        setErrorMessage("Could not rename this chat. Please try again.");
+        return;
+      }
+
+      setChats((previous) =>
+        previous
+          .map((chat) => chat.id === id ? { ...chat, title: data.title, updated_at: data.updated_at } : chat)
+          .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+      );
+      setRenamingId(null);
+      setRenameTitle("");
+    } catch (error) {
+      console.error("Rename chat error:", error);
+      setErrorMessage("Something went wrong while renaming the chat.");
+    } finally {
+      setSavingRename(false);
+    }
+  };
+
+  // ============================================
   // GO HOME
   // ============================================
 
@@ -198,6 +260,14 @@ export default function HistoryPage() {
       setDeletingId(null);
     }
   };
+
+  const filteredChats = chats.filter((chat) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    const titleMatch = (chat.title || "Untitled Chat").toLowerCase().includes(query);
+    const messageMatch = Array.isArray(chat.messages) && chat.messages.some((message) => message.text?.toLowerCase().includes(query));
+    return titleMatch || messageMatch;
+  });
 
   // ============================================
   // FORMAT DATE
@@ -278,6 +348,18 @@ export default function HistoryPage() {
           </button>
         </div>
 
+        <div className="mb-6 relative">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717a]" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search conversations and messages..."
+            aria-label="Search chat history"
+            className="w-full rounded-xl border border-[#27272a] bg-[#090909] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#52525b] focus:border-blue-500"
+          />
+        </div>
+
         {/* ========================================
             ERROR
         ======================================== */}
@@ -352,9 +434,9 @@ export default function HistoryPage() {
         ======================================== */}
 
         {!loading &&
-          chats.length > 0 && (
+          filteredChats.length > 0 && (
             <div className="space-y-3">
-              {chats.map((chat) => (
+              {filteredChats.map((chat) => (
                 <div
                   key={chat.id}
                   className="group border border-[#1f1f1f] bg-[#080808] rounded-2xl p-5 hover:border-[#333333] transition"
@@ -381,10 +463,34 @@ export default function HistoryPage() {
                       {/* CHAT INFO */}
 
                       <div className="flex-1 min-w-0">
-                        <h2 className="font-semibold truncate">
-                          {chat.title ||
-                            "Untitled Chat"}
-                        </h2>
+                        {renamingId === chat.id ? (
+                          <form
+                            className="flex items-center gap-2"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void renameChat(chat.id);
+                            }}
+                          >
+                            <input
+                              autoFocus
+                              value={renameTitle}
+                              onChange={(event) => setRenameTitle(event.target.value)}
+                              maxLength={80}
+                              aria-label="New chat title"
+                              className="min-w-0 flex-1 rounded-lg border border-[#333] bg-black px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                            />
+                            <button type="submit" disabled={savingRename} aria-label="Save chat title" className="rounded-lg p-2 text-emerald-400 hover:bg-[#171717] disabled:opacity-50">
+                              <Check size={16} />
+                            </button>
+                            <button type="button" onClick={() => { setRenamingId(null); setRenameTitle(""); }} aria-label="Cancel rename" className="rounded-lg p-2 text-[#a1a1aa] hover:bg-[#171717]">
+                              <X size={16} />
+                            </button>
+                          </form>
+                        ) : (
+                          <h2 className="font-semibold truncate">
+                            {chat.title || "Untitled Chat"}
+                          </h2>
+                        )}
 
                         <p className="text-xs text-[#52525b] mt-1">
                           {formatDate(
@@ -407,8 +513,23 @@ export default function HistoryPage() {
                       </div>
                     </button>
 
-                    {/* DELETE BUTTON */}
+                    {/* RENAME + DELETE BUTTONS */}
 
+                    <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRenamingId(chat.id);
+                        setRenameTitle(chat.title || "");
+                        setErrorMessage("");
+                      }}
+                      disabled={renamingId === chat.id}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-[#52525b] hover:text-blue-400 hover:bg-[#151515] transition disabled:opacity-50"
+                      aria-label="Rename chat"
+                      title="Rename chat"
+                    >
+                      <Pencil size={16} />
+                    </button>
                     <button
                       type="button"
                       onClick={() =>
@@ -429,11 +550,20 @@ export default function HistoryPage() {
                         <Trash2 size={17} />
                       )}
                     </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+
+        {!loading && !errorMessage && chats.length > 0 && filteredChats.length === 0 && (
+          <div className="rounded-2xl border border-[#1f1f1f] p-10 text-center">
+            <Search size={30} className="mx-auto mb-3 text-[#52525b]" />
+            <h2 className="font-semibold">No matching conversations</h2>
+            <p className="mt-2 text-sm text-[#71717a]">Try a different title or keyword.</p>
+          </div>
+        )}
       </main>
     </div>
   );
