@@ -1475,23 +1475,8 @@ export default function OLANIX() {
           );
         }
 
-        if (
-          typeof data.account
-            ?.memoryEnabled ===
-          "boolean"
-        ) {
-          setMemoryEnabled(
-            data.account.memoryEnabled
-          );
-        } else if (
-          typeof data.memory
-            ?.enabled ===
-          "boolean"
-        ) {
-          setMemoryEnabled(
-            data.memory.enabled
-          );
-        }
+        // Memory is always enabled; no user-facing switch is provided.
+        setMemoryEnabled(true);
 
         if (data.memory?.savedText && !canSaveChat) {
           const existingGuestMemory = readGuestMemory();
