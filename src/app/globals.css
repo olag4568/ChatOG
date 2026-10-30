@@ -1,3 +1,5 @@
+@import "katex/dist/katex.min.css";
+
 @import "tailwindcss";
 
 :root {
@@ -36,4 +38,24 @@ body {
   display: none;
   width: 0;
   height: 0;
+}
+
+
+/* Readable spacing and horizontal scrolling for displayed equations. */
+.prose .katex-display {
+  display: block;
+  margin: 1.25rem 0;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+.prose .katex {
+  font-size: 1.08em;
+}
+
+.prose p:has(.katex-display) {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
