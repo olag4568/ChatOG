@@ -157,6 +157,7 @@ export default function OLANIX() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
 
@@ -1914,7 +1915,7 @@ export default function OLANIX() {
           ================================================= */}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[min(280px,85vw)] shrink-0 border-r flex flex-col transition-transform duration-300 md:static md:z-auto md:translate-x-0 ${
+        className={`${isSidebarCollapsed ? "md:hidden" : ""} fixed inset-y-0 left-0 z-50 w-[min(280px,85vw)] shrink-0 border-r flex flex-col transition-transform duration-300 md:static md:z-auto md:translate-x-0 ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } ${
           isDarkMode
@@ -1943,25 +1944,12 @@ export default function OLANIX() {
           </button>
           <button
             type="button"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            className={`w-9 h-9 flex items-center justify-center rounded-lg transition ${
-              isDarkMode
-                ? "hover:bg-[#111111]"
-                : "hover:bg-[#f3f3f3]"
-            }`}
+            onClick={() => { setIsSidebarCollapsed(true); setIsMobileSidebarOpen(false); }}
+            aria-label="Close sidebar"
+            title="Close sidebar"
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition ${isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"}`}
           >
-            {isDarkMode ? (
-              <Moon
-                size={18}
-                className="text-white"
-              />
-            ) : (
-              <Sun
-                size={18}
-                className="text-black"
-              />
-            )}
+            <Menu size={18} />
           </button>
         </div>
 
@@ -2342,6 +2330,21 @@ export default function OLANIX() {
             : "bg-white"
         }`}
       >
+        {isSidebarCollapsed && (
+          <div className={`hidden md:flex h-16 shrink-0 items-center border-b px-4 ${isDarkMode ? "border-[#1a1a1a]" : "border-[#e5e5e5]"}`}>
+            <button
+              type="button"
+              aria-label="Open sidebar"
+              title="Open sidebar"
+              onClick={() => setIsSidebarCollapsed(false)}
+              className={`flex h-10 w-10 items-center justify-center rounded-lg transition ${isDarkMode ? "hover:bg-[#111111]" : "hover:bg-[#f3f3f3]"}`}
+            >
+              <Menu size={21} />
+            </button>
+            <span className="ml-3 text-base font-semibold">OLANIX</span>
+          </div>
+        )}
+
         {/* Mobile header */}
         <div className={`flex items-center gap-3 border-b px-4 py-3 md:hidden ${
           isDarkMode ? "border-[#1a1a1a]" : "border-[#e5e5e5]"
