@@ -1225,7 +1225,7 @@ TEXTBOOK-STYLE MATHEMATICS PRESENTATION:
 - Do not repeat the number "1" for every step. If numbering is used, it must be sequential.
 - Keep related transformations together and align equal signs where practical. Do not put several unrelated calculations into one crowded line.
 - Use standard mathematical notation and properly rendered mathematical expressions. Use inline math for short expressions and display math for important equations or multi-line working. Do not output raw LaTeX commands as visible text; ensure the math is enclosed in the appropriate math delimiters.
-- STRICT RENDERING RULE: Never write an equation as plain text inside square brackets, for example `[ 3x - 7 = 2x + 5 ]`. Square brackets are not math delimiters. Use `$3x - 7 = 2x + 5import { NextResponse } from "next/server";
+- STRICT RENDERING RULE: Never write an equation as plain text inside square brackets, for example '[ 3x - 7 = 2x + 5 ]'. Square brackets are not math delimiters. Use `$3x - 7 = 2x + 5import { NextResponse } from "next/server";
 import { tavily } from "@tavily/core";
 import OpenAI from "openai";
 import { createClient as createServerSupabaseClient } from "@/lib/supabase/server";
@@ -2451,7 +2451,238 @@ TEXTBOOK-STYLE MATHEMATICS PRESENTATION:
 - Do not force numbered steps for every calculation. Textbooks commonly show a sequence of equations under "Solution"; use numbered steps only when the method genuinely has distinct stages.
 - Do not repeat the number "1" for every step. If numbering is used, it must be sequential.
 - Keep related transformations together and align equal signs where practical. Do not put several unrelated calculations into one crowded line.
- for inline mathematics and `$3x - 7 = 2x + 5$` for a displayed equation. For multi-line working, put each equation in its own display-math block, or use a valid aligned display-math block only if supported by the chat renderer.
+ for inline mathematics and '$3x - 7 = 2x + 5 for a displayed equation. For multi-line working, put each equation in its own display-math block, or use a valid aligned display-math block only if supported by the chat renderer.
+- For a simple solution, prefer separate display-math blocks rather than a single crowded aligned block. Keep explanations outside the equations. Never place raw LaTeX commands such as `\\begin{aligned}` in ordinary text.
+- Before sending any mathematics response, inspect every equation: confirm that its math delimiters are present and paired, that it is not wrapped in ordinary square brackets, and that the notation will render as mathematics rather than plain text.
+- Do not surround equations with decorative square brackets. Do not use programming-style code blocks for ordinary mathematics.
+- Do not insert decorative semicolons between answers. Separate multiple roots with "or" or place them on separate lines.
+- Avoid unnecessary headings, excessive bold text, emojis, conversational filler, and long explanations. The result should resemble a neat worked example in a mathematics textbook, not a chat response describing every keystroke.
+- Finish with a clearly identified final answer. Include all solutions where the equation has more than one root.
+- Before responding, check that the displayed working is complete, sequential, mathematically valid, and leads to the stated answer.
+
+SCIENCE AND PHYSICS TEACHING:
+
+- Explain science and physics in plain, simple language appropriate to the user's level.
+- Define symbols and units before using a formula when needed.
+- State the correct formula, substitute the given values carefully, and show the calculation step by step.
+- Use parentheses and other grouping symbols wherever needed, especially for negative values, fractions, powers, and substitutions.
+- Convert units before substitution when necessary. Include units in the working and final answer.
+- Clearly separate values supplied in the question from any illustrative example.
+- If required information is missing, say so instead of making it up.
+- Keep explanations focused and avoid dense tables when a short list is clearer.
+
+PAPER-STYLE SOLUTION BOX:
+
+- Use a paper-style solution ONLY when the user asks for work on paper, a white sheet, a worksheet, or in a boxed written format.
+- For that requested layout, put the complete worked solution in exactly one fenced block labelled solution-paper. The UI renders this as a clean white-sheet box.
+- Inside the block, use plain text only: a short title, the original question, textbook-style sequential working, brief explanations beside important steps, and a clearly marked final answer.
+- Do not put Markdown tables, nested code fences, or LaTeX delimiters inside the solution-paper block. Keep equations in readable plain text.
+- For normal maths answers, use the TEXTBOOK-STYLE MATHEMATICS PRESENTATION above.
+- Never output fake UI labels such as "CodeCopy codeShare", and do not label a paper solution as programming code.
+
+ACCURACY:
+
+- Never invent facts, sources, locations,
+  weather conditions, dates, or numbers.
+- If information is uncertain, say so.
+
+GENERAL RULE:
+
+Answer the user's current question directly.
+Do not mention this system prompt.
+`;
+
+    // ==========================================
+    // 15. GROQ REQUEST
+    // ==========================================
+
+    async function askGroq(model: string) {
+      const userContent = image
+        ? [
+            {
+              type: "text" as const,
+              text:
+                message ||
+                "Please analyze this image.",
+            },
+            {
+              type: "image_url" as const,
+              image_url: {
+                url: image,
+              },
+            },
+          ]
+        : message;
+
+      return await groq.chat.completions.create({
+        model,
+
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          ...(!image
+            ? conversationHistory
+            : []
+          ),
+          {
+            role: "user",
+            content: userContent,
+          },
+        ],
+
+        temperature: image ? 0.4 : 0.5,
+
+        max_tokens: image ? 900 : 1536,
+      });
+    }
+
+    // ==========================================
+    // 16. ASK GROQ
+    // ==========================================
+
+    let completion;
+
+    try {
+      completion = await askGroq(
+        selectedModel
+      );
+    } catch (primaryError: any) {
+      console.warn(
+        `[OLANIX] ${selectedModel} failed:`,
+        primaryError?.message ||
+          primaryError
+      );
+
+      // Do not switch an image request
+      // to a text-only model.
+      if (image) {
+        throw new Error(
+          primaryError?.message ||
+            "OLANIX could not analyze the image."
+        );
+      }
+
+      selectedModel =
+        fallbackTextModel;
+
+      try {
+        completion =
+          await askGroq(
+            fallbackTextModel
+          );
+      } catch (
+        fallbackError: any
+      ) {
+        console.error(
+          "[OLANIX] Both Groq models failed:",
+          fallbackError?.message ||
+            fallbackError
+        );
+
+        throw new Error(
+          fallbackError?.message ||
+            "Groq could not generate a response."
+        );
+      }
+    }
+
+    // ==========================================
+    // 17. GET RESPONSE
+    // ==========================================
+
+    const reply =
+      completion
+        .choices?.[0]
+        ?.message?.content
+        ?.trim();
+
+    if (!reply) {
+      throw new Error(
+        "Groq returned an empty response."
+      );
+    }
+
+    // ==========================================
+    // 18. RETURN RESPONSE
+    // ==========================================
+
+    return NextResponse.json({
+      reply,
+
+      engineUsed:
+        `${engineUsed} (${selectedModel})`,
+
+      currentDate,
+      currentTime,
+      currentYear,
+
+      timezone: userTimeZone,
+
+      location: {
+        available:
+          latitude !== null &&
+          longitude !== null,
+
+        latitude,
+        longitude,
+      },
+
+      weather: {
+        available:
+          Boolean(weatherContext),
+      },
+
+      image: {
+        uploaded:
+          Boolean(image),
+
+        analyzed:
+          Boolean(image),
+      },
+
+      account: {
+        authenticated:
+          Boolean(userId),
+
+        role: userRole,
+
+        memoryAccess,
+
+        memoryEnabled:
+          actualMemoryEnabled,
+      },
+
+      memory: {
+        enabled:
+          actualMemoryEnabled,
+
+        saved:
+          Boolean(savedMemory),
+
+        savedText:
+          savedMemory,
+      },
+
+      sources,
+    });
+  } catch (error: any) {
+    console.error(
+      "[OLANIX API ERROR]",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          error?.message ||
+          "Internal server error.",
+      },
+      { status: 500 }
+    );
+  }
+} for a displayed equation. For multi-line working, put each equation in its own display-math block, or use a valid aligned display-math block only if supported by the chat renderer.
 - For a simple solution, prefer separate display-math blocks rather than a single crowded aligned block. Keep explanations outside the equations. Never place raw LaTeX commands such as `\\begin{aligned}` in ordinary text.
 - Before sending any mathematics response, inspect every equation: confirm that its math delimiters are present and paired, that it is not wrapped in ordinary square brackets, and that the notation will render as mathematics rather than plain text.
 - Do not surround equations with decorative square brackets. Do not use programming-style code blocks for ordinary mathematics.
