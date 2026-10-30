@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { createClient } from "@/lib/supabase/client";
 
 import {
@@ -2442,6 +2444,10 @@ export default function OLANIX() {
                         <ReactMarkdown
                           remarkPlugins={[
                             remarkGfm,
+                            remarkMath,
+                          ]}
+                          rehypePlugins={[
+                            rehypeKatex,
                           ]}
                           components={{
                             h1: ({
