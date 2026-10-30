@@ -2683,39 +2683,36 @@ export default function OLANIX() {
                                     <span>
                                       {codeNode?.props?.className?.replace("language-", "") || "Code"}
                                     </span>
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        try {
-                                          await navigator.clipboard.writeText(codeText);
-                                        } catch (error) {
-                                          console.error("Could not copy code:", error);
-                                        }
-                                      }}
-                                      className={`rounded-md px-2 py-1 transition-colors ${
-                                        isDarkMode
-                                          ? "hover:bg-[#202020] hover:text-white"
-                                          : "hover:bg-[#e7e7e7] hover:text-black"
-                                      }`}
-                                      aria-label="Copy code"
-                                      title="Copy code"
-                                    >
-                                      <span className="inline-flex items-center gap-1">
-                                        <Copy size={14} />
-                                        Copy code
-                                      </span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => shareText(codeText)}
-                                      className={`rounded-md px-2 py-1 transition-colors ${isDarkMode ? "hover:bg-[#202020] hover:text-white" : "hover:bg-[#e7e7e7] hover:text-black"}`}
-                                      aria-label="Share code"
-                                      title="Share code"
-                                    >
-                                      <span className="inline-flex items-center gap-1">
-                                        <Share2 size={14} /> Share
-                                      </span>
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          try {
+                                            await navigator.clipboard.writeText(codeText);
+                                          } catch (error) {
+                                            console.error("Could not copy code:", error);
+                                          }
+                                        }}
+                                        className={`rounded-md p-1.5 transition-colors ${
+                                          isDarkMode
+                                            ? "hover:bg-[#202020] hover:text-white"
+                                            : "hover:bg-[#e7e7e7] hover:text-black"
+                                        }`}
+                                        aria-label="Copy code"
+                                        title="Copy code"
+                                      >
+                                        <Copy size={15} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => shareText(codeText)}
+                                        className={`rounded-md p-1.5 transition-colors ${isDarkMode ? "hover:bg-[#202020] hover:text-white" : "hover:bg-[#e7e7e7] hover:text-black"}`}
+                                        aria-label="Share code"
+                                        title="Share code"
+                                      >
+                                        <Share2 size={15} />
+                                      </button>
+                                    </div>
                                   </div>
                                   <pre className="overflow-x-auto p-4 text-sm">
                                     {children}
