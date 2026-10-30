@@ -2257,15 +2257,16 @@ export default function OLANIX() {
                   }`}
                 >
                   <div
-                    className={`w-fit max-w-full rounded-2xl px-4 py-3 text-sm leading-7 ${
-                      msg.sender ===
-                      "user"
-                        ? isDarkMode
-                          ? "bg-[#111111] border border-[#252525] text-white rounded-br-none shadow-lg"
-                          : "bg-[#f3f3f3] border border-[#dedede] text-black rounded-br-none shadow-sm"
+                    className={`w-full max-w-full text-sm leading-7 break-words ${
+                      msg.sender === "user"
+                        ? `w-fit rounded-2xl px-4 py-3 ${
+                            isDarkMode
+                              ? "bg-[#111111] border border-[#252525] text-white rounded-br-none shadow-lg"
+                              : "bg-[#f3f3f3] border border-[#dedede] text-black rounded-br-none shadow-sm"
+                          }`
                         : isDarkMode
-                        ? "bg-[#0a0a0a] border border-[#1f1f1f] text-[#e4e4e7] rounded-bl-none shadow-md"
-                        : "bg-[#fafafa] border border-[#e5e5e5] text-[#171717] rounded-bl-none shadow-sm"
+                        ? "bg-transparent border-0 p-0 text-[#e4e4e7]"
+                        : "bg-transparent border-0 p-0 text-[#171717]"
                     }`}
                   >
                     {/* IMAGE */}
@@ -2723,14 +2724,8 @@ export default function OLANIX() {
         }`}>
           <div className="mx-auto w-full max-w-none">
           <div
-            className={`relative border rounded-[2rem] px-3 shadow-lg transition-all duration-200 ${
-              imagePreview
-                ? "pt-32 pb-2.5"
-                : "py-2.5"
-            } ${
-              isDarkMode
-                ? "bg-[#080808] border-[#252525] focus-within:border-[#3a3a3a]"
-                : "bg-white border-[#d4d4d4] focus-within:border-[#a3a3a3]"
+            className={`relative px-1 transition-all duration-200 ${
+              imagePreview ? "pt-32 pb-2.5" : "py-2.5"
             }`}
           >
             {/* IMAGE PREVIEW */}
