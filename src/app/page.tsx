@@ -2668,6 +2668,19 @@ export default function OLANIX() {
                                 typeof codeNode?.props?.children === "string"
                                   ? codeNode.props.children.replace(/\\n$/, "")
                                   : "";
+                              const language = codeNode?.props?.className?.replace("language-", "") || "Code";
+
+                              if (language === "solution-paper") {
+                                return (
+                                  <div className="my-5 rounded-2xl border border-[#e5e1d8] bg-[#fffefb] p-5 text-[#202020] shadow-sm sm:p-7">
+                                    <div className="mb-4 flex items-center justify-between border-b border-[#e9e4da] pb-3">
+                                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#777064]">Worked solution</span>
+                                      <span className="text-xs text-[#8a8479]">Step by step</span>
+                                    </div>
+                                    <pre className="whitespace-pre-wrap break-words font-sans text-[14px] leading-8 sm:text-[15px]">{codeText}</pre>
+                                  </div>
+                                );
+                              }
 
                               return (
                                 <div className={`my-4 overflow-hidden rounded-xl border ${
@@ -2680,9 +2693,7 @@ export default function OLANIX() {
                                       ? "border-b border-[#252525] text-gray-400"
                                       : "border-b border-[#e5e5e5] text-gray-600"
                                   }`}>
-                                    <span>
-                                      {codeNode?.props?.className?.replace("language-", "") || "Code"}
-                                    </span>
+                                    <span>{language}</span>
                                     <div className="flex items-center gap-1">
                                       <button
                                         type="button"
