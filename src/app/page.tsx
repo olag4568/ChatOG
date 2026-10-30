@@ -40,6 +40,10 @@ import {
   Copy,
   Check,
   Brain,
+  ThumbsUp,
+  ThumbsDown,
+  Volume2,
+  Share2,
   ExternalLink,
 } from "lucide-react";
 
@@ -136,6 +140,7 @@ export default function OLANIX() {
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
   const [renamingChatTitle, setRenamingChatTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [messageFeedback, setMessageFeedback] = useState<Record<number, "like" | "dislike">>({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // =====================================================
@@ -1617,6 +1622,82 @@ export default function OLANIX() {
     };
 
   // =====================================================
+  // AI RESPONSE ACTIONS
+  // =====================================================
+
+  const shareText = async (text: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "OLANIX response", text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert("Share is not available here. Reply copied so you can share it.");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("SHARE ERROR:", error);
+      }
+    }
+  };
+
+  const readAloud = (text: string) => {
+    if (!("speechSynthesis" in window)) {
+      alert("Read aloud is not supported by this browser.");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const retryResponse = async (messageId: number) => {
+    if (loading) return;
+    const targetIndex = messages.findIndex((item) => item.id === messageId && item.sender === "ai");
+    if (targetIndex < 1) return;
+    const previousUser = [...messages.slice(0, targetIndex)].reverse().find((item) => item.sender === "user");
+    if (!previousUser) return;
+
+    const history = messages.slice(0, targetIndex);
+    const updatedMessages = messages.slice(0, targetIndex + 1);
+    setMessages(updatedMessages);
+    setLoading(true);
+
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: previousUser.text,
+          image: previousUser.image || null,
+          location: userLocation,
+          timezone,
+          currentDate: new Date().toISOString(),
+          memoryEnabled,
+          guestMemories: readGuestMemory(),
+          history: history.slice(0, -1)
+            .filter((item) => (item.sender === "user" || item.sender === "ai") && item.text.trim())
+            .slice(-12)
+            .map((item) => ({ role: item.sender === "ai" ? "assistant" : "user", content: item.text.slice(0, 6000) })),
+        }),
+      });
+      const data: ChatApiResponse = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not regenerate this response.");
+      const replacement: Message = { id: Date.now(), sender: "ai", text: data.reply || data.message || "I couldn't generate a response." };
+      const finalMessages = [...history, replacement];
+      setMessages(finalMessages);
+      if (chatId) await saveChatMessages(chatId, finalMessages);
+    } catch (error) {
+      console.error("RETRY ERROR:", error);
+      alert(error instanceof Error ? error.message : "Could not regenerate this response.");
+      setMessages(history);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
   // KEYBOARD
   // =====================================================
 
@@ -2579,6 +2660,17 @@ export default function OLANIX() {
                                         Copy code
                                       </span>
                                     </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => shareText(codeText)}
+                                      className={`rounded-md px-2 py-1 transition-colors ${isDarkMode ? "hover:bg-[#202020] hover:text-white" : "hover:bg-[#e7e7e7] hover:text-black"}`}
+                                      aria-label="Share code"
+                                      title="Share code"
+                                    >
+                                      <span className="inline-flex items-center gap-1">
+                                        <Share2 size={14} /> Share
+                                      </span>
+                                    </button>
                                   </div>
                                   <pre className="overflow-x-auto p-4 text-sm">
                                     {children}
@@ -2593,6 +2685,16 @@ export default function OLANIX() {
                       </div>
                     )}
                   </div>
+                  {msg.sender === "ai" && (
+                    <div className={`mt-3 flex flex-wrap items-center gap-1 ${isDarkMode ? "text-[#888]" : "text-[#737373]"}`}>
+                      <button type="button" onClick={() => navigator.clipboard.writeText(msg.text)} title="Copy reply" aria-label="Copy reply" className={`rounded-lg p-2 transition ${isDarkMode ? "hover:bg-[#1b1b1b] hover:text-white" : "hover:bg-[#f0f0f0] hover:text-black"}`}><Copy size={16} /></button>
+                      <button type="button" onClick={() => setMessageFeedback((current) => ({ ...current, [msg.id]: current[msg.id] === "like" ? undefined as never : "like" }))} title="Like" aria-label="Like reply" aria-pressed={messageFeedback[msg.id] === "like"} className={`rounded-lg p-2 transition ${messageFeedback[msg.id] === "like" ? "text-green-500" : ""} ${isDarkMode ? "hover:bg-[#1b1b1b]" : "hover:bg-[#f0f0f0]"}`}><ThumbsUp size={16} /></button>
+                      <button type="button" onClick={() => setMessageFeedback((current) => ({ ...current, [msg.id]: current[msg.id] === "dislike" ? undefined as never : "dislike" }))} title="Dislike" aria-label="Dislike reply" aria-pressed={messageFeedback[msg.id] === "dislike"} className={`rounded-lg p-2 transition ${messageFeedback[msg.id] === "dislike" ? "text-red-500" : ""} ${isDarkMode ? "hover:bg-[#1b1b1b]" : "hover:bg-[#f0f0f0]"}`}><ThumbsDown size={16} /></button>
+                      <button type="button" onClick={() => readAloud(msg.text)} title="Read aloud" aria-label="Read reply aloud" className={`rounded-lg p-2 transition ${isDarkMode ? "hover:bg-[#1b1b1b] hover:text-white" : "hover:bg-[#f0f0f0] hover:text-black"}`}><Volume2 size={16} /></button>
+                      <button type="button" onClick={() => shareText(msg.text)} title="Share reply" aria-label="Share reply" className={`rounded-lg p-2 transition ${isDarkMode ? "hover:bg-[#1b1b1b] hover:text-white" : "hover:bg-[#f0f0f0] hover:text-black"}`}><Share2 size={16} /></button>
+                      <button type="button" onClick={() => retryResponse(msg.id)} disabled={loading} title="Try again" aria-label="Try again" className={`rounded-lg p-2 transition disabled:opacity-40 ${isDarkMode ? "hover:bg-[#1b1b1b] hover:text-white" : "hover:bg-[#f0f0f0] hover:text-black"}`}><RefreshCw size={16} /></button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
