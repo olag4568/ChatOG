@@ -2261,8 +2261,8 @@ export default function OLANIX() {
                       msg.sender === "user"
                         ? `w-fit rounded-2xl px-4 py-3 ${
                             isDarkMode
-                              ? "bg-[#111111] border border-[#252525] text-white rounded-br-none shadow-lg"
-                              : "bg-[#f3f3f3] border border-[#dedede] text-black rounded-br-none shadow-sm"
+                              ? "bg-[#123b2b] border border-[#1b513a] text-white rounded-br-none shadow-lg"
+                              : "bg-[#dceee4] border border-[#c4dfcf] text-[#10291d] rounded-br-none shadow-sm"
                           }`
                         : isDarkMode
                         ? "bg-transparent border-0 p-0 text-[#e4e4e7]"
@@ -2724,8 +2724,12 @@ export default function OLANIX() {
         }`}>
           <div className="mx-auto w-full max-w-none">
           <div
-            className={`relative px-1 transition-all duration-200 ${
+            className={`relative border rounded-[2rem] px-3 shadow-lg transition-all duration-200 ${
               imagePreview ? "pt-32 pb-2.5" : "py-2.5"
+            } ${
+              isDarkMode
+                ? "bg-[#080808] border-[#252525] focus-within:border-[#3a3a3a]"
+                : "bg-white border-[#d4d4d4] focus-within:border-[#a3a3a3]"
             }`}
           >
             {/* IMAGE PREVIEW */}
