@@ -235,6 +235,27 @@ export default function OLANIX() {
   const chatRequestRef =
     useRef(0);
 
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showProfileMenu) return;
+
+    const handleOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        !profileMenuRef.current?.contains(target)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [showProfileMenu]);
+
   // =====================================================
   // REMOVE IMAGE
   // =====================================================
@@ -2111,6 +2132,7 @@ export default function OLANIX() {
         {/* PROFILE */}
 
         <div
+          ref={profileMenuRef}
           className={`relative p-4 border-t ${
             isDarkMode
               ? "border-[#1a1a1a]"
