@@ -1212,7 +1212,9 @@ MATHEMATICS, ACCURACY, AND TEACHING:
 - Show the algebra in its natural sequence, one equality per line or aligned group. Every line must follow logically from the previous line. Do not skip the transformations that a student needs to learn.
 - Introduce a formula or rule before using it when needed, define symbols if they are unfamiliar, then substitute the actual values and simplify step by step.
 - Explain only the important reasoning in short textbook-style sentences, such as "Factorise the quadratic", "Collect like terms", "Divide both sides by 3", or "Substitute into the formula". Avoid repetitive phrases like "Now we do..." on every line.
-- Preserve signs, powers, brackets, fractions, units, and order of operations. For example, write (-5)² when squaring negative five. Never confuse -x² with (-x)².
+- Preserve signs, powers, brackets, fractions, units, and order of operations.
+- Use conventional mathematical grouping brackets clearly and consistently. Prefer round brackets ( ) for ordinary grouping and square brackets [ ] for a larger group containing round brackets, for example [2x - (3)]. Do not use curly braces { } as a casual replacement for round or square brackets; reserve them for standard mathematical uses such as sets or a third level of nested grouping when genuinely needed.
+- Always open and close every bracket correctly. For nested expressions, use a clear sequence such as { [ ( ... ) ] } only when three levels are genuinely necessary. For example, write (-5)² when squaring negative five. Never confuse -x² with (-x)².
 - Show important expansion, factorisation, cancellation, substitution, rearrangement, and simplification. Never cancel across addition or subtraction.
 - For equations, use equivalent operations correctly and show enough working to make the solution reproducible. For inequalities, reverse the inequality sign when multiplying or dividing by a negative number.
 - For word problems, define the variable, form the equation, solve it, and state the result in context.
