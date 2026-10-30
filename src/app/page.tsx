@@ -236,6 +236,7 @@ export default function OLANIX() {
     useRef(0);
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const plusMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showProfileMenu) return;
@@ -255,6 +256,25 @@ export default function OLANIX() {
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [showProfileMenu]);
+
+  useEffect(() => {
+    if (!showPlusMenu) return;
+
+    const handleOutsideClick = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        !plusMenuRef.current?.contains(target)
+      ) {
+        setShowPlusMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [showPlusMenu]);
 
   // =====================================================
   // REMOVE IMAGE
@@ -2898,7 +2918,7 @@ export default function OLANIX() {
             <div className={`flex w-full items-center gap-2 ${messages.length === 0 && !loading ? "min-h-[48px]" : "items-end"}`}>
               {/* PLUS / UPLOAD */}
 
-              <div className="relative shrink-0">
+              <div ref={plusMenuRef} className="relative shrink-0">
                 {showPlusMenu && (
                   <div className={`absolute bottom-14 left-0 z-[150] w-[min(300px,calc(100vw-2rem))] max-h-[min(360px,55dvh)] overflow-y-auto overscroll-contain rounded-2xl border p-1.5 shadow-2xl ${
                     isDarkMode ? "bg-[#242424] border-[#3a3a3a] text-white" : "bg-white border-[#e5e5e5] text-black"
